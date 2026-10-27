@@ -3,14 +3,18 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "@/constants/landing-data";
+import { useRouter } from "next/navigation";
+import { auth0 } from "@/lib/auth0";
 
-export default function Header() {
+export default async function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
+
+  const session = await auth0.getSession();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -19,7 +23,7 @@ export default function Header() {
   }, []);
 
   const handleLoginClick = () => {
-    alert("Chuyển hướng đến trang đăng nhập hệ thống...");
+    router.push("auth/login");
   };
 
   return (
@@ -48,17 +52,22 @@ export default function Header() {
         </div>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-8">
           {NAV_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-sm font-medium text-slate-600 hover:text-blue-900 transition-colors"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
+            <button
+            key={link.label}
+            type="button"
+            onClick={() =>
+              document
+                .querySelector(link.href)
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+            className="text-sm font-medium text-slate-600 hover:text-blue-900 transition-colors"
+          >
+            {link.label}
+          </button>
+        ))}
+        </div>
 
         {/* Action */}
         <div className="hidden md:flex items-center gap-3">
