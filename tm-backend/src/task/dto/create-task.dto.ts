@@ -12,8 +12,12 @@ import { PriorityLevel } from '../../generated/prisma/enums.js';
 import { IsValidCustomFields } from '../custom-fields/custom-fields.validator.js';
 
 export class CreateTaskDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
+  workspaceId: string
+
+  @IsOptional()
+  @IsString()
   projectId: string
 
   @IsString()

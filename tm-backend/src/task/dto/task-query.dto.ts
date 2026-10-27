@@ -37,6 +37,11 @@ export class TaskQueryDTO {
   @Min(1)
   limit: number = 10;
 
+  // --- Lọc theo workspace --- 
+  @IsOptional()
+  @IsString()
+  workspaceId?: string;
+
   // --- Lọc theo Project & Subtask ---
   @IsOptional()
   @IsString()

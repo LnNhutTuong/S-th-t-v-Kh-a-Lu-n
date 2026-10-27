@@ -12,7 +12,7 @@ import { Prisma } from '../generated/prisma/client.js';
 import { TaskQueryDTO } from './dto/task-query.dto.js';
 import { WorkflowService } from '../workflow/workflow.service.js';
 import { PermissionService } from '../permission/permission.service.js';
-import { PERMISSION_KEYS } from '../permission/constants/pemission.constants.js';
+import { PERMISSION_KEYS, ROLE_KEY_DEFAULT, ROLE_RANK } from '../permission/constants/pemission.constants.js';
 
 @Injectable()
 export class TaskService {
@@ -23,20 +23,23 @@ export class TaskService {
       const limit = query.limit ?? 10;
       const skip = (page - 1 ) * limit;
 
+      const isSuperAdmin = await this.permissionService.isSuperAdmin(user.id);
+
+      const managedWorkspaceIds = (await this.prisma.workspaceMember.findMany({
+        where: {
+          userId: user.id,
+          deletedAt: null,
+          role: { key: { in: [ROLE_KEY_DEFAULT.OWNER, ROLE_KEY_DEFAULT.WORKSPACE_MANAGER] } } },
+        select: { workspaceId: true },
+      })).map((m) => m.workspaceId);
+
       const where: Prisma.TaskWhereInput = {
         deletedAt: null,
-        OR: [
-          {
-            project: {
-              OR: [
-                { createdById: user.id },
-                { members: { some: { userId: user.id } } },
-              ],
-            },
-          },
-          { taskAssignees: { some: { userId: user.id } } },
-          { createdBy: { id: user.id } },
-        ],
+        ...(isSuperAdmin ? {} : { OR: [
+          { project: { members: { some: { userId: user.id, deletedAt: null } } } },
+          { projectId: null, workspace: { members: { some: { userId: user.id, deletedAt: null } } } },
+          { workspaceId: { in: managedWorkspaceIds } },
+        ] }),
       };
 
       if(query.parentId !== undefined){
@@ -189,30 +192,55 @@ export class TaskService {
   }
 
   async createTask(dto: CreateTaskDto, user: AuthUser) {
-    const project = await this.prisma.project.findFirst({
+
+    const workspace = await this.prisma.workspace.findUnique({
       where:{
-        id: dto.projectId,
-        deletedAt: null
-      },
-      include:{
-        members:{
-          select:{
-            user:{
-              select:{
-                id: true, email: true, name: true
+        id: dto.workspaceId,
+        deletedAt: null,
+      }
+    })
+
+    if(!workspace){
+      throw new NotFoundException('Workspace not found')
+    }
+
+    if(!dto.workspaceId && !dto.projectId){
+      throw new BadRequestException('The task need workspaceId or projectId')
+    }
+
+    let project = null
+    if(dto.projectId){
+      project = await this.prisma.project.findFirst({
+          where:{
+            id: dto.projectId,
+          deletedAt: null
+        },
+        include:{
+          members:{
+            select:{
+              user:{
+                select:{
+                  id: true, email: true, name: true
+                }
               }
             }
           }
         }
-      }
-    })
+      })
 
-    if(!project){
-      throw new NotFoundException('Project not found')
+      if(!project){
+        throw new NotFoundException('Project not found')
+      }
+
+      if(project.workspaceId !== workspace.id){
+        throw new BadRequestException('Project is not in this workspace')
+      }
+
     }
+    
 
     //check permission to create task
-    await this.permissionService.assertPermission(project.workspaceId, user.id, PERMISSION_KEYS.TASK_CREATE, project.id)
+    await this.permissionService.assertPermission(dto.workspaceId, user.id, PERMISSION_KEYS.TASK_CREATE, project?.id)
 
     if(dto.parentId){
       const parentTask = await this.prisma.task.findFirst({
@@ -235,7 +263,7 @@ export class TaskService {
       }
     }
 
-    if(dto.assigneeIds){
+    if(dto.assigneeIds && project){
       const allowedUserIds = [project.createdById, ...project.members.map(m => m.user.id)];
       const isValid = dto.assigneeIds.every(id => allowedUserIds.includes(id));
 
@@ -246,7 +274,7 @@ export class TaskService {
 
     const task = await this.prisma.task.create({
       data:{
-        workspaceId: project.workspaceId,
+        workspaceId: workspace.id,
         projectId: dto.projectId,
         createdById: user.id,
         title: dto.title.trim(),
@@ -568,7 +596,8 @@ export class TaskService {
     })
 
   }
-    
+  
+  /** Co quyen hanh dong tren task hay khong */
   async assertTaskPermission(taskId: string, userId: string) {
   const task = await this.prisma.taskAssignee.findUnique({
     where: {
@@ -586,32 +615,47 @@ export class TaskService {
   return task;
 }
 
-  async assertCanViewTask(task: any, userId: string) {
-    if (await this.permissionService.isSuperAdmin(userId)) return;
+  // async assertCanViewTask(task: any, userId: string) {
+  //   if (await this.permissionService.isSuperAdmin(userId)) return;
 
-    const createdById = task.createdById ?? task.createdBy?.id;
-    if (createdById === userId) return;
+  //   const createdById = task.createdById ?? task.createdBy?.id;
+  //   if (createdById === userId) return;
 
-    const isAssignee = task.taskAssignees?.some(
-      (a: any) => a.userId === userId || a.user?.id === userId
-    );
-    if (isAssignee) return;
+  //   const isAssignee = task.taskAssignees?.some(
+  //     (a: any) => a.userId === userId || a.user?.id === userId
+  //   );
+  //   if (isAssignee) return;
 
-    const isProjectMember = task.project?.members?.some(
-      (m: any) => m.userId === userId && m.deletedAt === null
-    );
-    if (isProjectMember) return;
+  //   const isProjectMember = task.project?.members?.some(
+  //     (m: any) => m.userId === userId && m.deletedAt === null
+  //   );
+  //   if (isProjectMember) return;
 
-    const projectId = task.projectId ?? task.project?.id ?? undefined;
-    const hasAssignPerm = await this.permissionService.hasPermission(
-      task.workspaceId,
-      userId,
-      PERMISSION_KEYS.TASK_ASSIGN,
-      projectId
-    );
-    if (hasAssignPerm) return;
+  //   const projectId = task.projectId ?? task.project?.id ?? undefined;
+  //   const hasAssignPerm = await this.permissionService.hasPermission(
+  //     task.workspaceId,
+  //     userId,
+  //     PERMISSION_KEYS.TASK_ASSIGN,
+  //     projectId
+  //   );
+  //   if (hasAssignPerm) return;
 
-    throw new ForbiddenException('You do not have permission to view this task');
+  //   throw new ForbiddenException('You do not have permission to view this task');
+  // }
+
+  //cai thien thuat toan dung nghia den
+  async assertCanViewTask(task: { workspaceId: string; projectId: string | null }, userId: string) {
+    const m = await this.permissionService.getMembership(userId, task.workspaceId, task.projectId);
+
+    if (m.superAdmin) return;
+
+    const canView = task.projectId
+      ? m.projectRank > 0 || m.workspaceRank >= ROLE_RANK[ROLE_KEY_DEFAULT.WORKSPACE_MANAGER]
+      : m.workspaceRank > 0;
+
+    if (!canView){
+      throw new ForbiddenException('You cannot view this task');
+    } 
   }
 
 }

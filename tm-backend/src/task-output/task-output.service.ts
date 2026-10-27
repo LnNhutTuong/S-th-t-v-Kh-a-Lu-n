@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CreateTaskOutputDto } from './dto/create-task-output.dto.js';
 import { UpdateTaskOutputDto } from './dto/update-task-output.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -22,8 +22,13 @@ export class TaskOutputService {
         await this.projectService.assertProjectMember(task.project.id, user.id);
       }
       await this.taskService.assertTaskPermission(task.id, user.id);
-      await this.permissionService.assertPermission(task.workspaceId, user.id, PERMISSION_KEYS.OUTPUT_CREATE, task.project?.id)
 
+      //check membership
+      const memberShip = task.taskAssignees.some(assignee => assignee.userId === user.id);
+      if(!memberShip){
+        throw new ForbiddenException('You dont have permission to create task output');
+      }
+      
       return this.prisma.taskOutput.create({
         data:{
           taskId: task.id,
@@ -42,7 +47,9 @@ export class TaskOutputService {
         include:{
           task:{
             select:{
-              id: true
+              id: true,
+              workspaceId: true,
+              projectId: true
             }
           }
         }
@@ -52,13 +59,14 @@ export class TaskOutputService {
         throw new NotFoundException('Task output not found');
       }
 
-      await this.taskService.findOne(taskOutput.task.id, user);
+      await this.taskService.assertCanViewTask({workspaceId: taskOutput.task.workspaceId, projectId: taskOutput.task.projectId}, user.id);
       
       return taskOutput;
     }
 
     async findByTaskId(taskId: string, user: AuthUser){
       const task = await this.taskService.findOne(taskId, user);
+      await this.taskService.assertCanViewTask({workspaceId: task.workspaceId, projectId: task.projectId}, user.id);
 
       return this.prisma.taskOutput.findMany({
         where:{
@@ -142,6 +150,7 @@ export class TaskOutputService {
         throw new NotFoundException('Task output not found')
       }
 
+      await this.taskService.assertTaskPermission(taskOutput.task.id, user.id);
       await this.permissionService.assertPermission(taskOutput.task.workspaceId, user.id, PERMISSION_KEYS.OUTPUT_DELETE, taskOutput.task.projectId ?? undefined)
 
       return this.prisma.taskOutput.delete({
