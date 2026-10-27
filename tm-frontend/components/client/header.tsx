@@ -7,14 +7,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "@/constants/landing-data";
 import { useRouter } from "next/navigation";
-import { auth0 } from "@/lib/auth0";
 
-export default async function Header() {
+
+export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
-
-  const session = await auth0.getSession();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
