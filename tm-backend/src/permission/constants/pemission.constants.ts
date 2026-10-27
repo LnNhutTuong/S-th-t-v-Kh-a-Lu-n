@@ -18,6 +18,16 @@ export const ROLE_KEY_DEFAULT = {
   PROJECT_MEMBER: 'PROJECT_MEMBER',
 } as const;
 
+export const ROLE_RANK: Record<string, number> = {
+  [ROLE_KEY_DEFAULT.OWNER]: 4,
+  [ROLE_KEY_DEFAULT.WORKSPACE_MANAGER]: 3,
+  [ROLE_KEY_DEFAULT.PROJECT_LEAD]: 2,
+  [ROLE_KEY_DEFAULT.MEMBER]: 1,
+  [ROLE_KEY_DEFAULT.PROJECT_MEMBER]: 1,
+};
+
+export const RANK_SUPER_ADMIN = 22;
+
 export const PERMISSION_KEYS = {
     // ─── USER ─────────────────────────────────────
     USER_VIEW: 'user:view',

@@ -27,15 +27,22 @@ export class EvidenceService {
         //tim task va check can view
         const task = await this.taskService.findOne(taskOutput.taskId, user);
 
-        //check project member
-        if(task.project){
-            await this.projectService.assertProjectMember(task.project.id, user.id);
-        }
-        
-        await this.taskService.assertTaskPermission(task.id, user.id);
+        //check membership 
+        const memberShip = task.taskAssignees.some(assignee => assignee.userId === user.id);
 
-        //check permission
-        await this.permissionService.assertPermission(task.workspaceId, user.id, PERMISSION_KEYS.EVIDENCE_SUBMIT, task.project?.id)
+        if(!memberShip){
+            throw new ForbiddenException('You dont have permission to submit evidence');
+        }
+
+        // //check project member
+        // if(task.project){
+        //     await this.projectService.assertProjectMember(task.project.id, user.id);
+        // }
+        
+        // await this.taskService.assertTaskPermission(task.id, user.id);
+
+        // //check permission
+        // await this.permissionService.assertPermission(task.workspaceId, user.id, PERMISSION_KEYS.EVIDENCE_SUBMIT, task.project?.id)
 
         const submitted = await this.prisma.evidence.create({
             data:{
@@ -82,18 +89,18 @@ export class EvidenceService {
                 id  
             },
             include:{
+                uploadedBy:{
+                    select:{
+                        id: true,
+                        name: true
+                    }
+                },
                 taskOutput:{
                     select:{
                         task:{
                             select:{
-                                createdById: true, // thang giao task
                                 workspaceId: true,
-                                projectId: true,
-                                project:{
-                                    select:{
-                                        createdById: true, // thang owner project,
-                                    }
-                                }
+                                projectId: true
                             }
                         }
                     }
@@ -103,13 +110,22 @@ export class EvidenceService {
 
         if(!evidence){
             throw new NotFoundException('Evidence not found');
+        }   
+        
+        if(user.id === evidence.uploadedById){
+            throw new ForbiddenException('You cannot review your own evidence')
+        }
+
+        const rankReviewer = await this.permissionService.getRanks([user.id], evidence.taskOutput.task.workspaceId, evidence.taskOutput.task.projectId)
+        console.log(">>>check rank reviewer: ", rankReviewer);
+        const rankUploader = await this.permissionService.getRanks([evidence.uploadedBy.id], evidence.taskOutput.task.workspaceId, evidence.taskOutput.task.projectId)
+        console.log(">>>check rank uploader: ", rankUploader);
+
+        if(rankReviewer <= rankUploader){
+            throw new ForbiddenException('You dont have permission to review this evidence')
         }
 
         const task = evidence.taskOutput.task;
-
-        if (evidence.uploadedById === user.id) {
-            throw new ForbiddenException('You cannot review your own evidence');
-        }
 
         const isSuperAdmin = await this.permissionService.isSuperAdmin(user.id);
 

@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from "../prisma/prisma.service.js"
 import { RoleScope } from '../generated/prisma/enums.js';
-import { ROLE_NAME_DEFAULT } from './constants/pemission.constants.js';
+import { ROLE_NAME_DEFAULT, RANK_SUPER_ADMIN, ROLE_RANK } from './constants/pemission.constants.js';
 
 @Injectable()
 export class PermissionService {
@@ -37,61 +37,29 @@ export class PermissionService {
 
     // ───  WORKSPACE & PROJECT LEVEL ───────────────────────────────────────────────────────────
     /** Trả về boolean, không ném lỗi. Không phải member thì cũng là false */
-    async hasPermission(workspaceId: string, userId: string, permissionKey: string, projectId?: string): Promise<boolean> {
+    async hasPermission(workspaceId: string, userId: string, permissionKey: string, projectId?: string | null) {
+
       if (await this.isSuperAdmin(userId)) return true;
 
-      const member = await this.prisma.workspaceMember.findUnique({
-        where: { 
-          userId_workspaceId: { userId, workspaceId },
-          AND: [
-            { deletedAt: null },
-            { user: { deletedAt: null } },
-            { workspace: { deletedAt: null } }
-          ]
-        },
-        select: {
-          role: {
-            select: {
-              name: true,
-              // chỉ lấy đúng quyền cần kiểm tra, không load cả list
-              permissions: {
-                where: { permission: { key: permissionKey } },
-                select: { permissionId: true },
-                take: 1,
-              },
-            },
-          },
-        },
+      const permFilter = { where: { permission: { key: permissionKey } }, select: { permissionId: true }, take: 1 };
+
+      const member = await this.prisma.workspaceMember.findFirst({
+        where: { userId, workspaceId, deletedAt: null, user: { deletedAt: null }, workspace: { deletedAt: null } },
+        select: { role: { select: { permissions: permFilter } } },
       });
 
       if (!member) return false;
+
       if (member.role.permissions.length > 0) return true;
+
       if (!projectId) return false;
 
-      const projectMember = await this.prisma.projectMember.findFirst({
-        where: {
-          projectId,
-          userId,
-          deletedAt: null,
-          project: {
-            workspaceId,
-            deletedAt: null,
-          },
-        },
-        select: {
-          role: {
-            select: {
-              permissions: {
-                where: { permission: { key: permissionKey } },
-                select: { permissionId: true },
-                take: 1,
-              },
-            },
-          },
-        },
+      const pm = await this.prisma.projectMember.findFirst({
+        where: { userId, projectId, deletedAt: null, project: { workspaceId, deletedAt: null } },
+        select: { role: { select: { permissions: permFilter } } },
       });
 
-      return (projectMember?.role?.permissions.length ?? 0) > 0;
+      return (pm?.role.permissions.length ?? 0) > 0;
     }
     
     /** Ném lỗi nếu không có quyền */
@@ -108,5 +76,35 @@ export class PermissionService {
       if (!ok.some(Boolean)) {
         throw new ForbiddenException('You do not have permission');
       }
+    }
+
+    /**Laays rank user**/ 
+    async getRanks(userIds: string[], workspaceId: string, projectId?: string | null) {
+      const wms = await this.prisma.workspaceMember.findMany({
+        where: { workspaceId, userId: { in: userIds }, deletedAt: null },
+        select: { userId: true, role: { select: { key: true } } },
+      });
+      const pms = projectId
+        ? await this.prisma.projectMember.findMany({
+            where: { projectId, userId: { in: userIds }, deletedAt: null },
+            select: { userId: true, role: { select: { key: true } } },
+          })
+        : [];
+      const map = new Map<string, { workspaceRank: number; projectRank: number; rank: number }>();
+      for (const id of userIds) {
+        const wr = ROLE_RANK[wms.find((m) => m.userId === id)?.role.key ?? ''] ?? 0;
+        const pr = ROLE_RANK[pms.find((m) => m.userId === id)?.role.key ?? ''] ?? 0;
+        map.set(id, { workspaceRank: wr, projectRank: pr, rank: Math.max(wr, pr) });
+      }
+      return map;
+    }
+
+    /**Check member ship**/ 
+    async getMembership(userId: string, workspaceId: string, projectId?: string | null) {
+      if (await this.isSuperAdmin(userId)) {
+        return { superAdmin: true, workspaceRank: RANK_SUPER_ADMIN, projectRank: RANK_SUPER_ADMIN, rank: RANK_SUPER_ADMIN };
+      }
+      // TODO (sau khi có parentId): nếu là Owner/Manager của workspace cha -> rank 5
+      return { superAdmin: false, ...(await this.getRanks([userId], workspaceId, projectId)).get(userId)! };
     }
 }
