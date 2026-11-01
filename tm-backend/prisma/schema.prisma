@@ -305,7 +305,7 @@ model TepTin {
   mimeType      String
   kichThuoc     Int // byte
   khoaLuuTru    String //key URL
-  nhaCungCap    String // ví dụ B2, SUPABASE. Có thể sẽ xài 2 thằng vì quá nghèo
+  nhaCungCap    String // ví dụ B2, SUPABASE.
   nguoiTaiLenId String
   taiLenLuc     DateTime @default(now())
 

@@ -1,15 +1,15 @@
-import { Module } from '@nestjs/common';
-import { KpiService } from './kpi.service.js';
-import { KpiController } from './kpi.controller.js';
-import { PrismaModule } from '../prisma/prisma.module.js';
-import { AuthModule } from '../auth/auth.module.js';
-import { TaskModule } from '../task/task.module.js';
-import {FormulaEngineModule} from '../formula-engine/formula-engine.module.js'
-import { PermissionModule } from '../permission/permission.module.js';
+// import { Module } from '@nestjs/common';
+// import { KpiService } from './kpi.service.js';
+// import { KpiController } from './kpi.controller.js';
+// import { PrismaModule } from '../prisma/prisma.module.js';
+// import { AuthModule } from '../auth/auth.module.js';
+// import { TaskModule } from '../task/task.module.js';
+// import {FormulaEngineModule} from '../formula-engine/formula-engine.module.js'
+// import { PermissionModule } from '../permission/permission.module.js';
 
-@Module({
-  imports: [PrismaModule, AuthModule, TaskModule, FormulaEngineModule, PermissionModule],
-  controllers: [KpiController],
-  providers: [KpiService],
-})
-export class KpiModule {}
+// @Module({
+//   imports: [PrismaModule, AuthModule, TaskModule, FormulaEngineModule, PermissionModule],
+//   controllers: [KpiController],
+//   providers: [KpiService],
+// })
+// export class KpiModule {}

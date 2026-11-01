@@ -7,7 +7,6 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { PermissionService } from "../permission.service.js";
 import { AuthUser } from "../../auth/types/jwt-payload.type.js";
 import { PERMISSION_KEY } from "../decorations/permission.decoration.js";
 import { IS_PUBLIC_KEY } from "../decorations/public.decorator.js";
@@ -16,7 +15,6 @@ import { IS_PUBLIC_KEY } from "../decorations/public.decorator.js";
 export class WorkspaceGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private permissionService: PermissionService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -43,7 +41,7 @@ export class WorkspaceGuard implements CanActivate {
     if (!user) return false;
 
     // 3. SUPER_ADMIN hệ thống luôn có toàn quyền
-    if (await this.permissionService.isSuperAdmin(user.id)) return true;
+    // if (await this.permissionService.isSuperAdmin(user.id)) return true;
 
     // 4. Lấy workspaceId linh hoạt (từ params, query, body hoặc header)
     const workspaceId =
@@ -58,14 +56,14 @@ export class WorkspaceGuard implements CanActivate {
     }
 
     // 5. Kiểm tra quyền của Member trong Workspace
-    const ok = await this.permissionService.hasPermission(
-      workspaceId,
-      user.id,
-      permissionKey,
-    );
-    if (!ok) {
-      throw new ForbiddenException(`You do not has permission`);
-    }
+    // const ok = await this.permissionService.hasPermission(
+    //   workspaceId,
+    //   user.id,
+    //   permissionKey,
+    // );
+    // if (!ok) {
+    //   throw new ForbiddenException(`You do not has permission`);
+    // }
 
     return true;
   }

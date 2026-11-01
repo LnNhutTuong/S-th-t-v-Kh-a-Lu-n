@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth0 } from "@/lib/auth0";
+import { getAllowedDomains
 
+ } from "@/utils/auth/check-domain";
 export const runtime = "nodejs";
-
-const AGU_EMAIL_REGEX = /^[^\s@]+@student.agu\.edu\.vn$/i;
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,20 +30,20 @@ export async function POST(request: NextRequest) {
     }
 
     const email = body.email.trim().toLowerCase();
-
+    const allowedDomains = getAllowedDomains();
+    const emailDomain = email.split("@")[1];
     if (
       email.length > 254 ||
-      !AGU_EMAIL_REGEX.test(email)
+      !emailDomain ||
+      !allowedDomains.includes(emailDomain)
     ) {
       return NextResponse.json(
-        { message: "Vui lòng sử dụng email @agu.edu.vn." },
+        { message: "Vui lòng sử dụng email trường cung cấp." },
         { status: 400 },
       );
     }
 
     // TODO: Áp dụng rate limit theo IP và email tại đây.
-    // TODO: Nếu chỉ cho phép tài khoản đã được trường cấp,
-    // kiểm tra email có trong danh sách người dùng hợp lệ.
 
     await auth0.passwordless.start({
       connection: "email",
