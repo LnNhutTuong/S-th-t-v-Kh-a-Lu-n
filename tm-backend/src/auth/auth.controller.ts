@@ -1,7 +1,6 @@
 import { Controller, Post, Body, Get, Req } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
-import { RegisterDTO } from './dto/register.dto.js';
-import { LoginDTO } from './dto/login.dto.js';
+import {  PasswordlessLoginDTO } from './dto/login.dto.js';
 import type { Request } from 'express';
 import { Public } from '../permission/decorations/public.decorator.js';
 
@@ -9,25 +8,13 @@ import { Public } from '../permission/decorations/public.decorator.js';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post(`register`)
+  @Post('passwordless-login')
   @Public()
-  async register(@Body() dto: RegisterDTO) {
-    let user = await this.authService.register(dto);
-
-    return {
-      message: 'Register successfully',
-      data: user,
-    };
-  }
-
-  @Post(`login`)
-  @Public()
-  async login(@Body() dto: LoginDTO) {
-    let user = await this.authService.login(dto);
-
+  async passwordlessLogin(@Body() dto: PasswordlessLoginDTO) {
+    const user = await this.authService.loginByEmail(dto);
     return {
       message: 'Login successfully',
-      data: user,
+      data: user
     };
   }
 
@@ -35,4 +22,5 @@ export class AuthController {
   async me(@Req() req: Request) {
     return req.user;
   }
+
 }

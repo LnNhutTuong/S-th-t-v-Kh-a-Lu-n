@@ -4,14 +4,12 @@ import { UpdateClassificationRuleDto } from './dto/update-classification-rule.dt
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AuthUser } from '../auth/types/jwt-payload.type.js';
 import { PermissionService } from '../permission/permission.service.js';  
-import { WorkspaceService } from '../workspace/workspace.service.js';
 import { PERMISSION_KEYS } from '../permission/constants/pemission.constants.js';
 
 @Injectable()
 export class ClassificationRuleService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly workspaceService: WorkspaceService,
     private readonly permissionService: PermissionService,
   ) {}
 
@@ -40,7 +38,14 @@ export class ClassificationRuleService {
   }
 
   async findByWorkspace(workspaceId: string, user: AuthUser) { 
-    await this.workspaceService.assertWorkspaceMember(workspaceId, user.id)
+    const workspace = await this.prisma.workspace.findUnique({
+      where: {id: workspaceId, deletedAt: null}
+    })
+
+    if (!workspace) {
+      throw new Error('Workspace not found')
+    }
+    
     const classificationRules = await this.prisma.classificationRule.findMany({
       where: {
         workspaceId

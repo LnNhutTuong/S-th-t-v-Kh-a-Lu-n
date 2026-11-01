@@ -51,37 +51,46 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  User: 'User',
-  Permission: 'Permission',
-  Role: 'Role',
-  RolePermission: 'RolePermission',
-  UserRole: 'UserRole',
-  Workspace: 'Workspace',
-  WorkspaceMember: 'WorkspaceMember',
-  WorkspaceRole: 'WorkspaceRole',
-  Project: 'Project',
-  ProjectMember: 'ProjectMember',
-  Task: 'Task',
-  TaskAssignee: 'TaskAssignee',
-  Objective: 'Objective',
-  KeyResult: 'KeyResult',
-  TaskKeyResult: 'TaskKeyResult',
-  TaskOutput: 'TaskOutput',
-  Evidence: 'Evidence',
-  Metric: 'Metric',
-  Formula: 'Formula',
-  TaskMetricValue: 'TaskMetricValue',
-  KPISnapshot: 'KPISnapshot',
-  EvaluationPeriod: 'EvaluationPeriod',
-  EvaluationCriteria: 'EvaluationCriteria',
-  Evaluation: 'Evaluation',
-  EvaluationCriteriaResult: 'EvaluationCriteriaResult',
-  EvaluationReviewer: 'EvaluationReviewer',
-  EvaluationReviewerScore: 'EvaluationReviewerScore',
-  ClassificationRule: 'ClassificationRule',
-  Workflow: 'Workflow',
-  WorkflowStep: 'WorkflowStep',
-  WorkflowTransition: 'WorkflowTransition'
+  NguoiDung: 'NguoiDung',
+  BoPhan: 'BoPhan',
+  ThanhVienBoPhan: 'ThanhVienBoPhan',
+  VaiTro: 'VaiTro',
+  QuyenHan: 'QuyenHan',
+  VaiTroQuyenHan: 'VaiTroQuyenHan',
+  NguoiDungVaiTro: 'NguoiDungVaiTro',
+  TepTin: 'TepTin',
+  LoaiVanBan: 'LoaiVanBan',
+  VanBan: 'VanBan',
+  VanBanNhiemVu: 'VanBanNhiemVu',
+  VanBanDeTai: 'VanBanDeTai',
+  DeTaiDeAn: 'DeTaiDeAn',
+  DeTaiBoPhan: 'DeTaiBoPhan',
+  ThanhVienDeTai: 'ThanhVienDeTai',
+  NhiemVu: 'NhiemVu',
+  NhiemVuNguoiThucHien: 'NhiemVuNguoiThucHien',
+  PheDuyetNhiemVu: 'PheDuyetNhiemVu',
+  DauRaNhiemVu: 'DauRaNhiemVu',
+  MinhChung: 'MinhChung',
+  QuyTrinh: 'QuyTrinh',
+  BuocQuyTrinh: 'BuocQuyTrinh',
+  ChuyenBuoc: 'ChuyenBuoc',
+  MucTieu: 'MucTieu',
+  KetQuaChinh: 'KetQuaChinh',
+  NhiemVuKetQuaChinh: 'NhiemVuKetQuaChinh',
+  ChiSo: 'ChiSo',
+  CongThuc: 'CongThuc',
+  GiaTriChiSo: 'GiaTriChiSo',
+  KpiChot: 'KpiChot',
+  KyDanhGia: 'KyDanhGia',
+  CauHinhKyBoPhan: 'CauHinhKyBoPhan',
+  TieuChiDanhGia: 'TieuChiDanhGia',
+  QuyTacXepLoai: 'QuyTacXepLoai',
+  PhieuDanhGia: 'PhieuDanhGia',
+  KetQuaTuDanhGia: 'KetQuaTuDanhGia',
+  NguoiChamPhieu: 'NguoiChamPhieu',
+  DiemChamTieuChi: 'DiemChamTieuChi',
+  ThongBao: 'ThongBao',
+  PhienNhapExcel: 'PhienNhapExcel'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -100,397 +109,544 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const UserScalarFieldEnum = {
+export const NguoiDungScalarFieldEnum = {
   id: 'id',
   email: 'email',
-  password: 'password',
-  name: 'name',
-  avatar: 'avatar',
+  ten: 'ten',
+  anhDaiDien: 'anhDaiDien',
+  ngaySinh: 'ngaySinh',
   createdAt: 'createdAt',
-  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type NguoiDungScalarFieldEnum = (typeof NguoiDungScalarFieldEnum)[keyof typeof NguoiDungScalarFieldEnum]
+
+
+export const BoPhanScalarFieldEnum = {
+  id: 'id',
+  ma: 'ma',
+  ten: 'ten',
+  loai: 'loai',
+  nhom: 'nhom',
+  boPhanChaId: 'boPhanChaId',
+  ngungHoatDong: 'ngungHoatDong',
+  thongTinThem: 'thongTinThem',
+  createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+export type BoPhanScalarFieldEnum = (typeof BoPhanScalarFieldEnum)[keyof typeof BoPhanScalarFieldEnum]
 
 
-export const PermissionScalarFieldEnum = {
+export const ThanhVienBoPhanScalarFieldEnum = {
+  nguoiDungId: 'nguoiDungId',
+  boPhanId: 'boPhanId',
+  vaiTroId: 'vaiTroId',
+  capBac: 'capBac',
+  ngayThamGia: 'ngayThamGia',
+  ngayKetThuc: 'ngayKetThuc'
+} as const
+
+export type ThanhVienBoPhanScalarFieldEnum = (typeof ThanhVienBoPhanScalarFieldEnum)[keyof typeof ThanhVienBoPhanScalarFieldEnum]
+
+
+export const VaiTroScalarFieldEnum = {
   id: 'id',
-  key: 'key',
-  description: 'description',
+  ma: 'ma',
+  ten: 'ten',
+  phamVi: 'phamVi',
+  loaiBoPhan: 'loaiBoPhan',
+  capBac: 'capBac',
+  soLuongToiDa: 'soLuongToiDa',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VaiTroScalarFieldEnum = (typeof VaiTroScalarFieldEnum)[keyof typeof VaiTroScalarFieldEnum]
+
+
+export const QuyenHanScalarFieldEnum = {
+  id: 'id',
+  ma: 'ma',
+  moTa: 'moTa',
   createdAt: 'createdAt'
 } as const
 
-export type PermissionScalarFieldEnum = (typeof PermissionScalarFieldEnum)[keyof typeof PermissionScalarFieldEnum]
+export type QuyenHanScalarFieldEnum = (typeof QuyenHanScalarFieldEnum)[keyof typeof QuyenHanScalarFieldEnum]
 
 
-export const RoleScalarFieldEnum = {
+export const VaiTroQuyenHanScalarFieldEnum = {
+  vaiTroId: 'vaiTroId',
+  quyenHanId: 'quyenHanId'
+} as const
+
+export type VaiTroQuyenHanScalarFieldEnum = (typeof VaiTroQuyenHanScalarFieldEnum)[keyof typeof VaiTroQuyenHanScalarFieldEnum]
+
+
+export const NguoiDungVaiTroScalarFieldEnum = {
+  nguoiDungId: 'nguoiDungId',
+  vaiTroId: 'vaiTroId'
+} as const
+
+export type NguoiDungVaiTroScalarFieldEnum = (typeof NguoiDungVaiTroScalarFieldEnum)[keyof typeof NguoiDungVaiTroScalarFieldEnum]
+
+
+export const TepTinScalarFieldEnum = {
   id: 'id',
-  key: 'key',
-  name: 'name',
-  scope: 'scope',
-  workspaceId: 'workspaceId',
-  isSystem: 'isSystem',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type RoleScalarFieldEnum = (typeof RoleScalarFieldEnum)[keyof typeof RoleScalarFieldEnum]
-
-
-export const RolePermissionScalarFieldEnum = {
-  roleId: 'roleId',
-  permissionId: 'permissionId'
-} as const
-
-export type RolePermissionScalarFieldEnum = (typeof RolePermissionScalarFieldEnum)[keyof typeof RolePermissionScalarFieldEnum]
-
-
-export const UserRoleScalarFieldEnum = {
-  userId: 'userId',
-  roleId: 'roleId'
-} as const
-
-export type UserRoleScalarFieldEnum = (typeof UserRoleScalarFieldEnum)[keyof typeof UserRoleScalarFieldEnum]
-
-
-export const WorkspaceScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  ownerId: 'ownerId',
-  createdAt: 'createdAt',
-  deletedAt: 'deletedAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type WorkspaceScalarFieldEnum = (typeof WorkspaceScalarFieldEnum)[keyof typeof WorkspaceScalarFieldEnum]
-
-
-export const WorkspaceMemberScalarFieldEnum = {
-  userId: 'userId',
-  workspaceId: 'workspaceId',
-  roleId: 'roleId',
-  joinedAt: 'joinedAt',
-  deletedAt: 'deletedAt'
-} as const
-
-export type WorkspaceMemberScalarFieldEnum = (typeof WorkspaceMemberScalarFieldEnum)[keyof typeof WorkspaceMemberScalarFieldEnum]
-
-
-export const WorkspaceRoleScalarFieldEnum = {
-  workspaceId: 'workspaceId',
-  roleId: 'roleId'
-} as const
-
-export type WorkspaceRoleScalarFieldEnum = (typeof WorkspaceRoleScalarFieldEnum)[keyof typeof WorkspaceRoleScalarFieldEnum]
-
-
-export const ProjectScalarFieldEnum = {
-  id: 'id',
-  workspaceId: 'workspaceId',
-  createdById: 'createdById',
-  name: 'name',
-  description: 'description',
-  createdAt: 'createdAt',
-  deletedAt: 'deletedAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
-
-
-export const ProjectMemberScalarFieldEnum = {
-  projectId: 'projectId',
-  userId: 'userId',
-  roleId: 'roleId',
-  joinedAt: 'joinedAt',
-  deletedAt: 'deletedAt'
-} as const
-
-export type ProjectMemberScalarFieldEnum = (typeof ProjectMemberScalarFieldEnum)[keyof typeof ProjectMemberScalarFieldEnum]
-
-
-export const TaskScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  description: 'description',
-  priority: 'priority',
-  status: 'status',
-  dueDate: 'dueDate',
-  customFields: 'customFields',
-  workspaceId: 'workspaceId',
-  projectId: 'projectId',
-  createdById: 'createdById',
-  parentId: 'parentId',
-  createdAt: 'createdAt',
-  deletedAt: 'deletedAt',
-  updatedAt: 'updatedAt',
-  formulaId: 'formulaId'
-} as const
-
-export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
-
-
-export const TaskAssigneeScalarFieldEnum = {
-  taskId: 'taskId',
-  userId: 'userId',
-  assignedAt: 'assignedAt'
-} as const
-
-export type TaskAssigneeScalarFieldEnum = (typeof TaskAssigneeScalarFieldEnum)[keyof typeof TaskAssigneeScalarFieldEnum]
-
-
-export const ObjectiveScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  description: 'description',
-  startDate: 'startDate',
-  endDate: 'endDate',
-  createdAt: 'createdAt',
-  deletedAt: 'deletedAt',
-  updatedAt: 'updatedAt',
-  projectId: 'projectId',
-  workspaceId: 'workspaceId'
-} as const
-
-export type ObjectiveScalarFieldEnum = (typeof ObjectiveScalarFieldEnum)[keyof typeof ObjectiveScalarFieldEnum]
-
-
-export const KeyResultScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  description: 'description',
-  startValue: 'startValue',
-  currentValue: 'currentValue',
-  targetValue: 'targetValue',
-  unit: 'unit',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  objectiveId: 'objectiveId'
-} as const
-
-export type KeyResultScalarFieldEnum = (typeof KeyResultScalarFieldEnum)[keyof typeof KeyResultScalarFieldEnum]
-
-
-export const TaskKeyResultScalarFieldEnum = {
-  taskId: 'taskId',
-  keyResultId: 'keyResultId'
-} as const
-
-export type TaskKeyResultScalarFieldEnum = (typeof TaskKeyResultScalarFieldEnum)[keyof typeof TaskKeyResultScalarFieldEnum]
-
-
-export const TaskOutputScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  description: 'description',
-  expectedType: 'expectedType',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  taskId: 'taskId'
-} as const
-
-export type TaskOutputScalarFieldEnum = (typeof TaskOutputScalarFieldEnum)[keyof typeof TaskOutputScalarFieldEnum]
-
-
-export const EvidenceScalarFieldEnum = {
-  id: 'id',
-  fileUrl: 'fileUrl',
-  fileName: 'fileName',
+  tenGoc: 'tenGoc',
   mimeType: 'mimeType',
-  status: 'status',
-  reviewNote: 'reviewNote',
+  kichThuoc: 'kichThuoc',
+  khoaLuuTru: 'khoaLuuTru',
+  nhaCungCap: 'nhaCungCap',
+  nguoiTaiLenId: 'nguoiTaiLenId',
+  taiLenLuc: 'taiLenLuc'
+} as const
+
+export type TepTinScalarFieldEnum = (typeof TepTinScalarFieldEnum)[keyof typeof TepTinScalarFieldEnum]
+
+
+export const LoaiVanBanScalarFieldEnum = {
+  id: 'id',
+  ma: 'ma',
+  ten: 'ten',
+  moTa: 'moTa',
+  thuTu: 'thuTu',
+  dangDung: 'dangDung'
+} as const
+
+export type LoaiVanBanScalarFieldEnum = (typeof LoaiVanBanScalarFieldEnum)[keyof typeof LoaiVanBanScalarFieldEnum]
+
+
+export const VanBanScalarFieldEnum = {
+  id: 'id',
+  soHieu: 'soHieu',
+  trichYeu: 'trichYeu',
+  loaiVanBanId: 'loaiVanBanId',
+  coQuanBanHanh: 'coQuanBanHanh',
+  ngayBanHanh: 'ngayBanHanh',
+  boPhanQuanLyId: 'boPhanQuanLyId',
+  tepTinId: 'tepTinId',
+  trangThai: 'trangThai',
+  nguoiTaiLenId: 'nguoiTaiLenId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VanBanScalarFieldEnum = (typeof VanBanScalarFieldEnum)[keyof typeof VanBanScalarFieldEnum]
+
+
+export const VanBanNhiemVuScalarFieldEnum = {
+  vanBanId: 'vanBanId',
+  nhiemVuId: 'nhiemVuId'
+} as const
+
+export type VanBanNhiemVuScalarFieldEnum = (typeof VanBanNhiemVuScalarFieldEnum)[keyof typeof VanBanNhiemVuScalarFieldEnum]
+
+
+export const VanBanDeTaiScalarFieldEnum = {
+  vanBanId: 'vanBanId',
+  deTaiId: 'deTaiId'
+} as const
+
+export type VanBanDeTaiScalarFieldEnum = (typeof VanBanDeTaiScalarFieldEnum)[keyof typeof VanBanDeTaiScalarFieldEnum]
+
+
+export const DeTaiDeAnScalarFieldEnum = {
+  id: 'id',
+  ma: 'ma',
+  ten: 'ten',
+  moTa: 'moTa',
+  loai: 'loai',
+  boPhanChuTriId: 'boPhanChuTriId',
+  ngayBatDau: 'ngayBatDau',
+  ngayKetThuc: 'ngayKetThuc',
+  daKichHoat: 'daKichHoat',
+  thongTinThem: 'thongTinThem',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  taskOutputId: 'taskOutputId',
-  uploadedById: 'uploadedById',
-  uploadedAt: 'uploadedAt',
-  reviewedById: 'reviewedById',
-  reviewedAt: 'reviewedAt'
+  deletedAt: 'deletedAt'
 } as const
 
-export type EvidenceScalarFieldEnum = (typeof EvidenceScalarFieldEnum)[keyof typeof EvidenceScalarFieldEnum]
+export type DeTaiDeAnScalarFieldEnum = (typeof DeTaiDeAnScalarFieldEnum)[keyof typeof DeTaiDeAnScalarFieldEnum]
 
 
-export const MetricScalarFieldEnum = {
-  id: 'id',
-  key: 'key',
-  name: 'name',
-  description: 'description',
-  unit: 'unit',
-  workspaceId: 'workspaceId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+export const DeTaiBoPhanScalarFieldEnum = {
+  deTaiId: 'deTaiId',
+  boPhanId: 'boPhanId'
 } as const
 
-export type MetricScalarFieldEnum = (typeof MetricScalarFieldEnum)[keyof typeof MetricScalarFieldEnum]
+export type DeTaiBoPhanScalarFieldEnum = (typeof DeTaiBoPhanScalarFieldEnum)[keyof typeof DeTaiBoPhanScalarFieldEnum]
 
 
-export const FormulaScalarFieldEnum = {
+export const ThanhVienDeTaiScalarFieldEnum = {
+  deTaiId: 'deTaiId',
+  nguoiDungId: 'nguoiDungId',
+  vaiTroId: 'vaiTroId'
+} as const
+
+export type ThanhVienDeTaiScalarFieldEnum = (typeof ThanhVienDeTaiScalarFieldEnum)[keyof typeof ThanhVienDeTaiScalarFieldEnum]
+
+
+export const NhiemVuScalarFieldEnum = {
   id: 'id',
-  name: 'name',
-  expression: 'expression',
-  description: 'description',
-  version: 'version',
+  ma: 'ma',
+  tieuDe: 'tieuDe',
+  moTa: 'moTa',
+  mucUuTien: 'mucUuTien',
+  hanHoanThanh: 'hanHoanThanh',
+  nguonTao: 'nguonTao',
+  moTaKpi: 'moTaKpi',
+  thongTinThem: 'thongTinThem',
+  boPhanQuanLyId: 'boPhanQuanLyId',
+  deTaiId: 'deTaiId',
+  nhiemVuChaId: 'nhiemVuChaId',
+  nguoiTaoId: 'nguoiTaoId',
+  congThucId: 'congThucId',
+  buocQuyTrinhId: 'buocQuyTrinhId',
+  coHieuLuc: 'coHieuLuc',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  workspaceId: 'workspaceId'
+  deletedAt: 'deletedAt'
 } as const
 
-export type FormulaScalarFieldEnum = (typeof FormulaScalarFieldEnum)[keyof typeof FormulaScalarFieldEnum]
+export type NhiemVuScalarFieldEnum = (typeof NhiemVuScalarFieldEnum)[keyof typeof NhiemVuScalarFieldEnum]
 
 
-export const TaskMetricValueScalarFieldEnum = {
-  id: 'id',
-  taskId: 'taskId',
-  metricId: 'metricId',
-  value: 'value'
+export const NhiemVuNguoiThucHienScalarFieldEnum = {
+  nhiemVuId: 'nhiemVuId',
+  nguoiDungId: 'nguoiDungId',
+  boPhanId: 'boPhanId',
+  buocQuyTrinhId: 'buocQuyTrinhId',
+  nguoiGiaoId: 'nguoiGiaoId',
+  ngayGiao: 'ngayGiao',
+  ngayHoanThanh: 'ngayHoanThanh'
 } as const
 
-export type TaskMetricValueScalarFieldEnum = (typeof TaskMetricValueScalarFieldEnum)[keyof typeof TaskMetricValueScalarFieldEnum]
+export type NhiemVuNguoiThucHienScalarFieldEnum = (typeof NhiemVuNguoiThucHienScalarFieldEnum)[keyof typeof NhiemVuNguoiThucHienScalarFieldEnum]
 
 
-export const KPISnapshotScalarFieldEnum = {
+export const PheDuyetNhiemVuScalarFieldEnum = {
   id: 'id',
-  taskId: 'taskId',
-  finalScore: 'finalScore',
-  expression: 'expression',
-  version: 'version',
-  metricValues: 'metricValues',
-  calculatedAt: 'calculatedAt'
+  nhiemVuId: 'nhiemVuId',
+  loai: 'loai',
+  boPhanGiaoId: 'boPhanGiaoId',
+  boPhanNhanId: 'boPhanNhanId',
+  boPhanDuyetId: 'boPhanDuyetId',
+  trangThai: 'trangThai',
+  nguoiYeuCauId: 'nguoiYeuCauId',
+  nguoiDuyetId: 'nguoiDuyetId',
+  lyDo: 'lyDo',
+  thoiGianYeuCau: 'thoiGianYeuCau',
+  thoiGianXuLy: 'thoiGianXuLy'
 } as const
 
-export type KPISnapshotScalarFieldEnum = (typeof KPISnapshotScalarFieldEnum)[keyof typeof KPISnapshotScalarFieldEnum]
+export type PheDuyetNhiemVuScalarFieldEnum = (typeof PheDuyetNhiemVuScalarFieldEnum)[keyof typeof PheDuyetNhiemVuScalarFieldEnum]
 
 
-export const EvaluationPeriodScalarFieldEnum = {
+export const DauRaNhiemVuScalarFieldEnum = {
   id: 'id',
-  name: 'name',
-  startDate: 'startDate',
-  endDate: 'endDate',
-  kpiWeight: 'kpiWeight',
-  criteriaWeight: 'criteriaWeight',
-  workspaceId: 'workspaceId',
+  nhiemVuId: 'nhiemVuId',
+  tieuDe: 'tieuDe',
+  moTa: 'moTa',
+  loaiDauRa: 'loaiDauRa',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type EvaluationPeriodScalarFieldEnum = (typeof EvaluationPeriodScalarFieldEnum)[keyof typeof EvaluationPeriodScalarFieldEnum]
+export type DauRaNhiemVuScalarFieldEnum = (typeof DauRaNhiemVuScalarFieldEnum)[keyof typeof DauRaNhiemVuScalarFieldEnum]
 
 
-export const EvaluationCriteriaScalarFieldEnum = {
+export const MinhChungScalarFieldEnum = {
   id: 'id',
-  name: 'name',
-  description: 'description',
-  maxScore: 'maxScore',
-  periodId: 'periodId'
+  dauRaId: 'dauRaId',
+  tepTinId: 'tepTinId',
+  trangThai: 'trangThai',
+  ghiChuDuyet: 'ghiChuDuyet',
+  nguoiNopId: 'nguoiNopId',
+  nopLuc: 'nopLuc',
+  nguoiDuyetId: 'nguoiDuyetId',
+  duyetLuc: 'duyetLuc'
 } as const
 
-export type EvaluationCriteriaScalarFieldEnum = (typeof EvaluationCriteriaScalarFieldEnum)[keyof typeof EvaluationCriteriaScalarFieldEnum]
+export type MinhChungScalarFieldEnum = (typeof MinhChungScalarFieldEnum)[keyof typeof MinhChungScalarFieldEnum]
 
 
-export const EvaluationScalarFieldEnum = {
+export const QuyTrinhScalarFieldEnum = {
   id: 'id',
-  periodId: 'periodId',
-  userId: 'userId',
-  status: 'status',
-  kpiScore: 'kpiScore',
-  criteriaScore: 'criteriaScore',
-  finalScore: 'finalScore',
-  classification: 'classification',
-  selfComment: 'selfComment',
+  ten: 'ten',
+  moTa: 'moTa',
+  boPhanId: 'boPhanId',
   createdAt: 'createdAt',
-  deletedAt: 'deletedAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type EvaluationScalarFieldEnum = (typeof EvaluationScalarFieldEnum)[keyof typeof EvaluationScalarFieldEnum]
+export type QuyTrinhScalarFieldEnum = (typeof QuyTrinhScalarFieldEnum)[keyof typeof QuyTrinhScalarFieldEnum]
 
 
-export const EvaluationCriteriaResultScalarFieldEnum = {
+export const BuocQuyTrinhScalarFieldEnum = {
   id: 'id',
-  evaluationId: 'evaluationId',
-  evaluationCriteriaId: 'evaluationCriteriaId',
-  selfScore: 'selfScore',
-  comment: 'comment'
+  quyTrinhId: 'quyTrinhId',
+  ten: 'ten',
+  nhan: 'nhan',
+  laBuocDau: 'laBuocDau',
+  laBuocCuoi: 'laBuocCuoi',
+  mau: 'mau',
+  thuTu: 'thuTu'
 } as const
 
-export type EvaluationCriteriaResultScalarFieldEnum = (typeof EvaluationCriteriaResultScalarFieldEnum)[keyof typeof EvaluationCriteriaResultScalarFieldEnum]
+export type BuocQuyTrinhScalarFieldEnum = (typeof BuocQuyTrinhScalarFieldEnum)[keyof typeof BuocQuyTrinhScalarFieldEnum]
 
 
-export const EvaluationReviewerScalarFieldEnum = {
-  evaluationId: 'evaluationId',
-  reviewerId: 'reviewerId',
-  comment: 'comment',
-  reviewedAt: 'reviewedAt',
+export const ChuyenBuocScalarFieldEnum = {
+  id: 'id',
+  quyTrinhId: 'quyTrinhId',
+  tuBuocId: 'tuBuocId',
+  denBuocId: 'denBuocId',
+  nhan: 'nhan'
+} as const
+
+export type ChuyenBuocScalarFieldEnum = (typeof ChuyenBuocScalarFieldEnum)[keyof typeof ChuyenBuocScalarFieldEnum]
+
+
+export const MucTieuScalarFieldEnum = {
+  id: 'id',
+  tieuDe: 'tieuDe',
+  moTa: 'moTa',
+  ngayBatDau: 'ngayBatDau',
+  ngayKetThuc: 'ngayKetThuc',
+  boPhanId: 'boPhanId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type MucTieuScalarFieldEnum = (typeof MucTieuScalarFieldEnum)[keyof typeof MucTieuScalarFieldEnum]
+
+
+export const KetQuaChinhScalarFieldEnum = {
+  id: 'id',
+  mucTieuId: 'mucTieuId',
+  tieuDe: 'tieuDe',
+  moTa: 'moTa',
+  giaTriBatDau: 'giaTriBatDau',
+  giaTriHienTai: 'giaTriHienTai',
+  giaTriMucTieu: 'giaTriMucTieu',
+  donViDo: 'donViDo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KetQuaChinhScalarFieldEnum = (typeof KetQuaChinhScalarFieldEnum)[keyof typeof KetQuaChinhScalarFieldEnum]
+
+
+export const NhiemVuKetQuaChinhScalarFieldEnum = {
+  nhiemVuId: 'nhiemVuId',
+  ketQuaChinhId: 'ketQuaChinhId'
+} as const
+
+export type NhiemVuKetQuaChinhScalarFieldEnum = (typeof NhiemVuKetQuaChinhScalarFieldEnum)[keyof typeof NhiemVuKetQuaChinhScalarFieldEnum]
+
+
+export const ChiSoScalarFieldEnum = {
+  id: 'id',
+  boPhanId: 'boPhanId',
+  khoa: 'khoa',
+  ten: 'ten',
+  moTa: 'moTa',
+  donViDo: 'donViDo',
+  nhom: 'nhom',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChiSoScalarFieldEnum = (typeof ChiSoScalarFieldEnum)[keyof typeof ChiSoScalarFieldEnum]
+
+
+export const CongThucScalarFieldEnum = {
+  id: 'id',
+  boPhanId: 'boPhanId',
+  ten: 'ten',
+  bieuThuc: 'bieuThuc',
+  bieuThucToiDa: 'bieuThucToiDa',
+  moTa: 'moTa',
+  phienBan: 'phienBan',
+  capApDung: 'capApDung',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CongThucScalarFieldEnum = (typeof CongThucScalarFieldEnum)[keyof typeof CongThucScalarFieldEnum]
+
+
+export const GiaTriChiSoScalarFieldEnum = {
+  id: 'id',
+  nhiemVuId: 'nhiemVuId',
+  nguoiDungId: 'nguoiDungId',
+  chiSoId: 'chiSoId',
+  giaTri: 'giaTri'
+} as const
+
+export type GiaTriChiSoScalarFieldEnum = (typeof GiaTriChiSoScalarFieldEnum)[keyof typeof GiaTriChiSoScalarFieldEnum]
+
+
+export const KpiChotScalarFieldEnum = {
+  id: 'id',
+  nhiemVuId: 'nhiemVuId',
+  nguoiDungId: 'nguoiDungId',
+  diemDat: 'diemDat',
+  diemToiDa: 'diemToiDa',
+  bieuThuc: 'bieuThuc',
+  bieuThucToiDa: 'bieuThucToiDa',
+  phienBan: 'phienBan',
+  giaTriChiSo: 'giaTriChiSo',
+  tinhLuc: 'tinhLuc'
+} as const
+
+export type KpiChotScalarFieldEnum = (typeof KpiChotScalarFieldEnum)[keyof typeof KpiChotScalarFieldEnum]
+
+
+export const KyDanhGiaScalarFieldEnum = {
+  id: 'id',
+  ten: 'ten',
+  ngayBatDau: 'ngayBatDau',
+  ngayKetThuc: 'ngayKetThuc',
+  tyTrongKpiMacDinh: 'tyTrongKpiMacDinh',
+  tyTrongTieuChiMacDinh: 'tyTrongTieuChiMacDinh',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KyDanhGiaScalarFieldEnum = (typeof KyDanhGiaScalarFieldEnum)[keyof typeof KyDanhGiaScalarFieldEnum]
+
+
+export const CauHinhKyBoPhanScalarFieldEnum = {
+  kyId: 'kyId',
+  boPhanId: 'boPhanId',
+  tyTrongKpi: 'tyTrongKpi',
+  tyTrongTieuChi: 'tyTrongTieuChi',
+  congThucKyId: 'congThucKyId'
+} as const
+
+export type CauHinhKyBoPhanScalarFieldEnum = (typeof CauHinhKyBoPhanScalarFieldEnum)[keyof typeof CauHinhKyBoPhanScalarFieldEnum]
+
+
+export const TieuChiDanhGiaScalarFieldEnum = {
+  id: 'id',
+  kyId: 'kyId',
+  boPhanId: 'boPhanId',
+  tieuChiChaId: 'tieuChiChaId',
+  ten: 'ten',
+  moTa: 'moTa',
+  kieuCham: 'kieuCham',
+  diemToiDa: 'diemToiDa',
+  thuTu: 'thuTu'
+} as const
+
+export type TieuChiDanhGiaScalarFieldEnum = (typeof TieuChiDanhGiaScalarFieldEnum)[keyof typeof TieuChiDanhGiaScalarFieldEnum]
+
+
+export const QuyTacXepLoaiScalarFieldEnum = {
+  id: 'id',
+  boPhanId: 'boPhanId',
+  grade: 'grade',
+  nhan: 'nhan',
+  diemTu: 'diemTu',
+  diemDen: 'diemDen',
+  moTa: 'moTa',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QuyTacXepLoaiScalarFieldEnum = (typeof QuyTacXepLoaiScalarFieldEnum)[keyof typeof QuyTacXepLoaiScalarFieldEnum]
+
+
+export const PhieuDanhGiaScalarFieldEnum = {
+  id: 'id',
+  kyId: 'kyId',
+  nguoiDungId: 'nguoiDungId',
+  boPhanId: 'boPhanId',
+  trangThai: 'trangThai',
+  diemKpi: 'diemKpi',
+  diemTieuChi: 'diemTieuChi',
+  diemTong: 'diemTong',
+  xepLoai: 'xepLoai',
+  tuNhanXet: 'tuNhanXet',
+  nguoiXacNhanId: 'nguoiXacNhanId',
+  xacNhanLuc: 'xacNhanLuc',
+  nhanXetXacNhan: 'nhanXetXacNhan',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type PhieuDanhGiaScalarFieldEnum = (typeof PhieuDanhGiaScalarFieldEnum)[keyof typeof PhieuDanhGiaScalarFieldEnum]
+
+
+export const KetQuaTuDanhGiaScalarFieldEnum = {
+  phieuId: 'phieuId',
+  tieuChiId: 'tieuChiId',
+  diemTuCham: 'diemTuCham',
+  damBao: 'damBao',
+  nhanXet: 'nhanXet'
+} as const
+
+export type KetQuaTuDanhGiaScalarFieldEnum = (typeof KetQuaTuDanhGiaScalarFieldEnum)[keyof typeof KetQuaTuDanhGiaScalarFieldEnum]
+
+
+export const NguoiChamPhieuScalarFieldEnum = {
+  id: 'id',
+  phieuId: 'phieuId',
+  nguoiChamId: 'nguoiChamId',
+  loai: 'loai',
+  nhanXet: 'nhanXet',
+  chamLuc: 'chamLuc',
   createdAt: 'createdAt'
 } as const
 
-export type EvaluationReviewerScalarFieldEnum = (typeof EvaluationReviewerScalarFieldEnum)[keyof typeof EvaluationReviewerScalarFieldEnum]
+export type NguoiChamPhieuScalarFieldEnum = (typeof NguoiChamPhieuScalarFieldEnum)[keyof typeof NguoiChamPhieuScalarFieldEnum]
 
 
-export const EvaluationReviewerScoreScalarFieldEnum = {
-  evaluationId: 'evaluationId',
-  reviewerId: 'reviewerId',
-  evaluationCriteriaId: 'evaluationCriteriaId',
-  score: 'score',
-  comment: 'comment'
+export const DiemChamTieuChiScalarFieldEnum = {
+  nguoiChamPhieuId: 'nguoiChamPhieuId',
+  tieuChiId: 'tieuChiId',
+  diem: 'diem',
+  nhanXet: 'nhanXet'
 } as const
 
-export type EvaluationReviewerScoreScalarFieldEnum = (typeof EvaluationReviewerScoreScalarFieldEnum)[keyof typeof EvaluationReviewerScoreScalarFieldEnum]
+export type DiemChamTieuChiScalarFieldEnum = (typeof DiemChamTieuChiScalarFieldEnum)[keyof typeof DiemChamTieuChiScalarFieldEnum]
 
 
-export const ClassificationRuleScalarFieldEnum = {
+export const ThongBaoScalarFieldEnum = {
   id: 'id',
-  grade: 'grade',
-  label: 'label',
-  minScore: 'minScore',
-  maxScore: 'maxScore',
-  description: 'description',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  workspaceId: 'workspaceId'
+  nguoiNhanId: 'nguoiNhanId',
+  loai: 'loai',
+  tieuDe: 'tieuDe',
+  noiDung: 'noiDung',
+  duongDan: 'duongDan',
+  daDoc: 'daDoc',
+  daGuiEmail: 'daGuiEmail',
+  taoLuc: 'taoLuc'
 } as const
 
-export type ClassificationRuleScalarFieldEnum = (typeof ClassificationRuleScalarFieldEnum)[keyof typeof ClassificationRuleScalarFieldEnum]
+export type ThongBaoScalarFieldEnum = (typeof ThongBaoScalarFieldEnum)[keyof typeof ThongBaoScalarFieldEnum]
 
 
-export const WorkflowScalarFieldEnum = {
+export const PhienNhapExcelScalarFieldEnum = {
   id: 'id',
-  name: 'name',
-  description: 'description',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  workspaceId: 'workspaceId',
-  projectId: 'projectId'
+  loai: 'loai',
+  nguoiTaoId: 'nguoiTaoId',
+  tenFile: 'tenFile',
+  trangThai: 'trangThai',
+  duLieuXemTruoc: 'duLieuXemTruoc',
+  loi: 'loi',
+  tomTat: 'tomTat',
+  taoLuc: 'taoLuc',
+  hetHanLuc: 'hetHanLuc',
+  duyetLuc: 'duyetLuc'
 } as const
 
-export type WorkflowScalarFieldEnum = (typeof WorkflowScalarFieldEnum)[keyof typeof WorkflowScalarFieldEnum]
-
-
-export const WorkflowStepScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  label: 'label',
-  isInitial: 'isInitial',
-  isFinal: 'isFinal',
-  color: 'color',
-  order: 'order',
-  workflowId: 'workflowId'
-} as const
-
-export type WorkflowStepScalarFieldEnum = (typeof WorkflowStepScalarFieldEnum)[keyof typeof WorkflowStepScalarFieldEnum]
-
-
-export const WorkflowTransitionScalarFieldEnum = {
-  id: 'id',
-  label: 'label',
-  workflowId: 'workflowId',
-  fromStepId: 'fromStepId',
-  toStepId: 'toStepId'
-} as const
-
-export type WorkflowTransitionScalarFieldEnum = (typeof WorkflowTransitionScalarFieldEnum)[keyof typeof WorkflowTransitionScalarFieldEnum]
+export type PhienNhapExcelScalarFieldEnum = (typeof PhienNhapExcelScalarFieldEnum)[keyof typeof PhienNhapExcelScalarFieldEnum]
 
 
 export const SortOrder = {

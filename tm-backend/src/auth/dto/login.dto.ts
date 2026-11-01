@@ -1,11 +1,10 @@
-import { IsString, IsNotEmpty, IsEmail } from 'class-validator';
+import { IsNotEmpty, IsEmail, Matches } from 'class-validator';
 
-export class LoginDTO {
+const AGU_EMAIL_REGEX = /^[^\s@]+@st  udent.agu\.edu\.vn$/i;
+
+export class PasswordlessLoginDTO {
+  @Matches(AGU_EMAIL_REGEX, {message: 'Only AGU student email is allowed'})
   @IsEmail()
   @IsNotEmpty()
   email: string;
-
-  @IsString()
-  @IsNotEmpty()
-  password: string;
 }

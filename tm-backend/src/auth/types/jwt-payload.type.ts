@@ -4,6 +4,13 @@ export type JwtPayload = {
   name: string | null;
 };
 
+export type AuthUser = {
+  id: string;
+  email: string;
+  name: string | null;
+};
+
+
 export type LoginResponse = {
   accessToken: string;
   user: {
@@ -19,8 +26,3 @@ export type LoginResponse = {
   };
 };
 
-export type AuthUser = {
-  id: string;
-  email: string;
-  name: string | null;
-};

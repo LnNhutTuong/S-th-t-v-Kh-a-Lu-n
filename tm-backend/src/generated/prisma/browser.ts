@@ -18,157 +18,202 @@ export { Prisma }
 export * as $Enums from './enums.js'
 export * from './enums.js';
 /**
- * Model User
+ * Model NguoiDung
  * 
  */
-export type User = Prisma.UserModel
+export type NguoiDung = Prisma.NguoiDungModel
 /**
- * Model Permission
+ * Model BoPhan
  * 
  */
-export type Permission = Prisma.PermissionModel
+export type BoPhan = Prisma.BoPhanModel
 /**
- * Model Role
+ * Model ThanhVienBoPhan
  * 
  */
-export type Role = Prisma.RoleModel
+export type ThanhVienBoPhan = Prisma.ThanhVienBoPhanModel
 /**
- * Model RolePermission
+ * Model VaiTro
  * 
  */
-export type RolePermission = Prisma.RolePermissionModel
+export type VaiTro = Prisma.VaiTroModel
 /**
- * Model UserRole
+ * Model QuyenHan
  * 
  */
-export type UserRole = Prisma.UserRoleModel
+export type QuyenHan = Prisma.QuyenHanModel
 /**
- * Model Workspace
+ * Model VaiTroQuyenHan
  * 
  */
-export type Workspace = Prisma.WorkspaceModel
+export type VaiTroQuyenHan = Prisma.VaiTroQuyenHanModel
 /**
- * Model WorkspaceMember
+ * Model NguoiDungVaiTro
  * 
  */
-export type WorkspaceMember = Prisma.WorkspaceMemberModel
+export type NguoiDungVaiTro = Prisma.NguoiDungVaiTroModel
 /**
- * Model WorkspaceRole
+ * Model TepTin
  * 
  */
-export type WorkspaceRole = Prisma.WorkspaceRoleModel
+export type TepTin = Prisma.TepTinModel
 /**
- * Model Project
+ * Model LoaiVanBan
  * 
  */
-export type Project = Prisma.ProjectModel
+export type LoaiVanBan = Prisma.LoaiVanBanModel
 /**
- * Model ProjectMember
+ * Model VanBan
  * 
  */
-export type ProjectMember = Prisma.ProjectMemberModel
+export type VanBan = Prisma.VanBanModel
 /**
- * Model Task
+ * Model VanBanNhiemVu
  * 
  */
-export type Task = Prisma.TaskModel
+export type VanBanNhiemVu = Prisma.VanBanNhiemVuModel
 /**
- * Model TaskAssignee
+ * Model VanBanDeTai
  * 
  */
-export type TaskAssignee = Prisma.TaskAssigneeModel
+export type VanBanDeTai = Prisma.VanBanDeTaiModel
 /**
- * Model Objective
+ * Model DeTaiDeAn
  * 
  */
-export type Objective = Prisma.ObjectiveModel
+export type DeTaiDeAn = Prisma.DeTaiDeAnModel
 /**
- * Model KeyResult
+ * Model DeTaiBoPhan
  * 
  */
-export type KeyResult = Prisma.KeyResultModel
+export type DeTaiBoPhan = Prisma.DeTaiBoPhanModel
 /**
- * Model TaskKeyResult
+ * Model ThanhVienDeTai
  * 
  */
-export type TaskKeyResult = Prisma.TaskKeyResultModel
+export type ThanhVienDeTai = Prisma.ThanhVienDeTaiModel
 /**
- * Model TaskOutput
+ * Model NhiemVu
  * 
  */
-export type TaskOutput = Prisma.TaskOutputModel
+export type NhiemVu = Prisma.NhiemVuModel
 /**
- * Model Evidence
+ * Model NhiemVuNguoiThucHien
  * 
  */
-export type Evidence = Prisma.EvidenceModel
+export type NhiemVuNguoiThucHien = Prisma.NhiemVuNguoiThucHienModel
 /**
- * Model Metric
+ * Model PheDuyetNhiemVu
  * 
  */
-export type Metric = Prisma.MetricModel
+export type PheDuyetNhiemVu = Prisma.PheDuyetNhiemVuModel
 /**
- * Model Formula
+ * Model DauRaNhiemVu
  * 
  */
-export type Formula = Prisma.FormulaModel
+export type DauRaNhiemVu = Prisma.DauRaNhiemVuModel
 /**
- * Model TaskMetricValue
+ * Model MinhChung
  * 
  */
-export type TaskMetricValue = Prisma.TaskMetricValueModel
+export type MinhChung = Prisma.MinhChungModel
 /**
- * Model KPISnapshot
+ * Model QuyTrinh
  * 
  */
-export type KPISnapshot = Prisma.KPISnapshotModel
+export type QuyTrinh = Prisma.QuyTrinhModel
 /**
- * Model EvaluationPeriod
+ * Model BuocQuyTrinh
  * 
  */
-export type EvaluationPeriod = Prisma.EvaluationPeriodModel
+export type BuocQuyTrinh = Prisma.BuocQuyTrinhModel
 /**
- * Model EvaluationCriteria
+ * Model ChuyenBuoc
  * 
  */
-export type EvaluationCriteria = Prisma.EvaluationCriteriaModel
+export type ChuyenBuoc = Prisma.ChuyenBuocModel
 /**
- * Model Evaluation
+ * Model MucTieu
  * 
  */
-export type Evaluation = Prisma.EvaluationModel
+export type MucTieu = Prisma.MucTieuModel
 /**
- * Model EvaluationCriteriaResult
+ * Model KetQuaChinh
  * 
  */
-export type EvaluationCriteriaResult = Prisma.EvaluationCriteriaResultModel
+export type KetQuaChinh = Prisma.KetQuaChinhModel
 /**
- * Model EvaluationReviewer
+ * Model NhiemVuKetQuaChinh
  * 
  */
-export type EvaluationReviewer = Prisma.EvaluationReviewerModel
+export type NhiemVuKetQuaChinh = Prisma.NhiemVuKetQuaChinhModel
 /**
- * Model EvaluationReviewerScore
+ * Model ChiSo
  * 
  */
-export type EvaluationReviewerScore = Prisma.EvaluationReviewerScoreModel
+export type ChiSo = Prisma.ChiSoModel
 /**
- * Model ClassificationRule
+ * Model CongThuc
  * 
  */
-export type ClassificationRule = Prisma.ClassificationRuleModel
+export type CongThuc = Prisma.CongThucModel
 /**
- * Model Workflow
+ * Model GiaTriChiSo
  * 
  */
-export type Workflow = Prisma.WorkflowModel
+export type GiaTriChiSo = Prisma.GiaTriChiSoModel
 /**
- * Model WorkflowStep
+ * Model KpiChot
  * 
  */
-export type WorkflowStep = Prisma.WorkflowStepModel
+export type KpiChot = Prisma.KpiChotModel
 /**
- * Model WorkflowTransition
+ * Model KyDanhGia
  * 
  */
-export type WorkflowTransition = Prisma.WorkflowTransitionModel
+export type KyDanhGia = Prisma.KyDanhGiaModel
+/**
+ * Model CauHinhKyBoPhan
+ * 
+ */
+export type CauHinhKyBoPhan = Prisma.CauHinhKyBoPhanModel
+/**
+ * Model TieuChiDanhGia
+ * 
+ */
+export type TieuChiDanhGia = Prisma.TieuChiDanhGiaModel
+/**
+ * Model QuyTacXepLoai
+ * 
+ */
+export type QuyTacXepLoai = Prisma.QuyTacXepLoaiModel
+/**
+ * Model PhieuDanhGia
+ * 
+ */
+export type PhieuDanhGia = Prisma.PhieuDanhGiaModel
+/**
+ * Model KetQuaTuDanhGia
+ * 
+ */
+export type KetQuaTuDanhGia = Prisma.KetQuaTuDanhGiaModel
+/**
+ * Model NguoiChamPhieu
+ * 
+ */
+export type NguoiChamPhieu = Prisma.NguoiChamPhieuModel
+/**
+ * Model DiemChamTieuChi
+ * 
+ */
+export type DiemChamTieuChi = Prisma.DiemChamTieuChiModel
+/**
+ * Model ThongBao
+ * 
+ */
+export type ThongBao = Prisma.ThongBaoModel
+/**
+ * Model PhienNhapExcel
+ * 
+ */
+export type PhienNhapExcel = Prisma.PhienNhapExcelModel

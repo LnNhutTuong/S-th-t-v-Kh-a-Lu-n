@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { AuthController } from './auth.controller.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
-import { PasswordModule } from '../common/password/password.module.js';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { PassportModule } from '@nestjs/passport';
@@ -14,7 +13,6 @@ import { StringValue } from 'ms';
   providers: [AuthService, JwtStrategy],
   imports: [
     PrismaModule,
-    PasswordModule,
     ConfigModule,
     PassportModule.register({
       defaultStrategy: 'jwt',

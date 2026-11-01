@@ -9,48 +9,175 @@
 * 🟢 You can import this file directly.
 */
 
-export const RoleScope = {
-  SYSTEM: 'SYSTEM',
-  WORKSPACE: 'WORKSPACE',
-  PROJECT: 'PROJECT'
+export const NhomDonVi = {
+  DAO_TAO: 'DAO_TAO',
+  CHUC_NANG: 'CHUC_NANG',
+  SU_NGHIEP: 'SU_NGHIEP'
 } as const
 
-export type RoleScope = (typeof RoleScope)[keyof typeof RoleScope]
+export type NhomDonVi = (typeof NhomDonVi)[keyof typeof NhomDonVi]
 
 
-export const PriorityLevel = {
-  LOW: 'LOW',
-  MEDIUM: 'MEDIUM',
-  HIGH: 'HIGH',
-  URGENT: 'URGENT'
+export const LoaiBoPhan = {
+  BAN_GIAM_HIEU: 'BAN_GIAM_HIEU',
+  KHOA: 'KHOA',
+  BO_MON: 'BO_MON',
+  PHONG: 'PHONG',
+  VIEN: 'VIEN',
+  TRUNG_TAM: 'TRUNG_TAM',
+  THU_VIEN: 'THU_VIEN',
+  TRUONG: 'TRUONG'
 } as const
 
-export type PriorityLevel = (typeof PriorityLevel)[keyof typeof PriorityLevel]
+export type LoaiBoPhan = (typeof LoaiBoPhan)[keyof typeof LoaiBoPhan]
 
 
-export const OutputType = {
-  DOCUMENT: 'DOCUMENT',
-  LINK: 'LINK',
-  OTHER: 'OTHER'
+export const CapBac = {
+  TRUONG: 'TRUONG',
+  PHO: 'PHO',
+  THANH_VIEN: 'THANH_VIEN'
 } as const
 
-export type OutputType = (typeof OutputType)[keyof typeof OutputType]
+export type CapBac = (typeof CapBac)[keyof typeof CapBac]
 
 
-export const EvidenceStatus = {
-  PENDING: 'PENDING',
-  ACCEPTED: 'ACCEPTED',
-  REJECTED: 'REJECTED'
+export const PhamViVaiTro = {
+  HE_THONG: 'HE_THONG',
+  BO_PHAN: 'BO_PHAN',
+  DE_TAI: 'DE_TAI'
 } as const
 
-export type EvidenceStatus = (typeof EvidenceStatus)[keyof typeof EvidenceStatus]
+export type PhamViVaiTro = (typeof PhamViVaiTro)[keyof typeof PhamViVaiTro]
 
 
-export const EvaluationStatus = {
-  DRAFT: 'DRAFT',
-  SUBMITTED: 'SUBMITTED',
-  REVIEWING: 'REVIEWING',
-  COMPLETED: 'COMPLETED'
+export const MucUuTien = {
+  THAP: 'THAP',
+  TRUNG_BINH: 'TRUNG_BINH',
+  CAO: 'CAO',
+  KHAN_CAP: 'KHAN_CAP'
 } as const
 
-export type EvaluationStatus = (typeof EvaluationStatus)[keyof typeof EvaluationStatus]
+export type MucUuTien = (typeof MucUuTien)[keyof typeof MucUuTien]
+
+
+export const NguonTaoNhiemVu = {
+  TU_DANG_KY: 'TU_DANG_KY',
+  DUOC_GIAO: 'DUOC_GIAO'
+} as const
+
+export type NguonTaoNhiemVu = (typeof NguonTaoNhiemVu)[keyof typeof NguonTaoNhiemVu]
+
+
+export const LoaiDeTai = {
+  DE_TAI: 'DE_TAI',
+  DE_AN: 'DE_AN'
+} as const
+
+export type LoaiDeTai = (typeof LoaiDeTai)[keyof typeof LoaiDeTai]
+
+
+export const LoaiDauRa = {
+  TAI_LIEU: 'TAI_LIEU',
+  LIEN_KET: 'LIEN_KET',
+  KHAC: 'KHAC'
+} as const
+
+export type LoaiDauRa = (typeof LoaiDauRa)[keyof typeof LoaiDauRa]
+
+
+export const TrangThaiMinhChung = {
+  CHO_DUYET: 'CHO_DUYET',
+  DA_CHAP_NHAN: 'DA_CHAP_NHAN',
+  BI_TRA_LAI: 'BI_TRA_LAI'
+} as const
+
+export type TrangThaiMinhChung = (typeof TrangThaiMinhChung)[keyof typeof TrangThaiMinhChung]
+
+
+export const TrangThaiVanBan = {
+  CON_HIEU_LUC: 'CON_HIEU_LUC',
+  HET_HIEU_LUC: 'HET_HIEU_LUC',
+  DA_AN: 'DA_AN'
+} as const
+
+export type TrangThaiVanBan = (typeof TrangThaiVanBan)[keyof typeof TrangThaiVanBan]
+
+
+export const LoaiPheDuyet = {
+  GIAO_NGANG: 'GIAO_NGANG',
+  DANG_KY: 'DANG_KY'
+} as const
+
+export type LoaiPheDuyet = (typeof LoaiPheDuyet)[keyof typeof LoaiPheDuyet]
+
+
+export const TrangThaiPheDuyet = {
+  CHO_DUYET: 'CHO_DUYET',
+  DA_DUYET: 'DA_DUYET',
+  TU_CHOI: 'TU_CHOI'
+} as const
+
+export type TrangThaiPheDuyet = (typeof TrangThaiPheDuyet)[keyof typeof TrangThaiPheDuyet]
+
+
+export const NhomChiSo = {
+  MUC_TIEU: 'MUC_TIEU',
+  KET_QUA: 'KET_QUA'
+} as const
+
+export type NhomChiSo = (typeof NhomChiSo)[keyof typeof NhomChiSo]
+
+
+export const CapApDungCongThuc = {
+  NHIEM_VU: 'NHIEM_VU',
+  KY: 'KY'
+} as const
+
+export type CapApDungCongThuc = (typeof CapApDungCongThuc)[keyof typeof CapApDungCongThuc]
+
+
+export const KieuChamTieuChi = {
+  NHI_PHAN: 'NHI_PHAN',
+  DIEM: 'DIEM'
+} as const
+
+export type KieuChamTieuChi = (typeof KieuChamTieuChi)[keyof typeof KieuChamTieuChi]
+
+
+export const TrangThaiPhieu = {
+  NHAP: 'NHAP',
+  DA_NOP: 'DA_NOP',
+  DANG_CHAM: 'DANG_CHAM',
+  CHO_XAC_NHAN: 'CHO_XAC_NHAN',
+  HOAN_TAT: 'HOAN_TAT'
+} as const
+
+export type TrangThaiPhieu = (typeof TrangThaiPhieu)[keyof typeof TrangThaiPhieu]
+
+
+export const LoaiNguoiCham = {
+  CHAM: 'CHAM',
+  XAC_NHAN: 'XAC_NHAN'
+} as const
+
+export type LoaiNguoiCham = (typeof LoaiNguoiCham)[keyof typeof LoaiNguoiCham]
+
+
+export const LoaiNhapExcel = {
+  BO_PHAN: 'BO_PHAN',
+  NGUOI_DUNG: 'NGUOI_DUNG',
+  NHIEM_VU: 'NHIEM_VU',
+  DE_TAI: 'DE_TAI'
+} as const
+
+export type LoaiNhapExcel = (typeof LoaiNhapExcel)[keyof typeof LoaiNhapExcel]
+
+
+export const TrangThaiPhienNhap = {
+  XEM_TRUOC: 'XEM_TRUOC',
+  DA_DUYET: 'DA_DUYET',
+  DA_HUY: 'DA_HUY',
+  LOI: 'LOI'
+} as const
+
+export type TrangThaiPhienNhap = (typeof TrangThaiPhienNhap)[keyof typeof TrangThaiPhienNhap]

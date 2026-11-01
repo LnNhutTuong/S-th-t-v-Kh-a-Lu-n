@@ -1,13 +1,22 @@
 // ==============================================================================
-// QUY ƯỚC QUẢN LÝ XÓA (DELETION CONVENTIONS):
-// 1. Soft Delete (deletedAt DateTime?):
-//    - Chỉ áp dụng cho 6 thực thể nghiệp vụ cốt lõi (Core Business Aggregates):
-//      User, Workspace, Project, Task, Objective, Evaluation.
-//    - Mục đích: Cho phép khôi phục (thùng rác), bảo toàn lịch sử và truy vết kiểm toán.
-// 2. Hard Delete & Cascade:
-//    - Mọi bảng phụ trợ, quan hệ N-N (join tables), sub-resources (TaskOutput, Evidence,
-//      WorkflowStep, EvaluationCriteria...) KHÔNG dùng deletedAt.
-//    - Khi bản ghi cha bị xóa, các bảng con được dọn dẹp sạch sẽ theo quan hệ Cascade/NoAction.
+// QUY ƯỚC
+// - Xóa mềm (deletedAt): NguoiDung, NhiemVu, DeTaiDeAn, MucTieu, PhieuDanhGia.
+//   BoPhan dùng ngungHoatDong, VanBan dùng trangThai. Bảng phụ trợ và bảng nối xóa cứng theo cascade.
+//
+//   CREATE UNIQUE INDEX "ThanhVienBoPhan_mot_truong_moi_bo_phan"
+//     ON "ThanhVienBoPhan" ("boPhanId")
+//     WHERE "capBac" = 'TRUONG' AND "ngayKetThuc" IS NULL;
+//
+// (Cột capBac của ThanhVienBoPhan là bản sao từ VaiTro.capBac, do service điền lúc gán vai trò,
+//  để chỉ mục có điều kiện kiểm tra được trong một bảng.)
+//
+// CÁC QUY TẮC KIỂM TRA Ở SERVICE (không khóa ở DB)
+// - Vai trò gán cho thành viên phải có loaiBoPhan khớp với BoPhan.loai.
+// - ThanhVienBoPhan.capBac phải bằng VaiTro.capBac của vaiTroId.
+// - Số lượng tối đa mỗi vai trò trong một bộ phận theo VaiTro.soLuongToiDa.
+// - Phó bắt buộc: kiểm tra khi mở kỳ đánh giá, không chặn lúc tạo bộ phận.
+// - ThanhVienDeTai: đúng 1 chủ nhiệm. DeTaiDeAn cần >= 1 văn bản căn cứ trước khi kích hoạt.
+// - Cây BoPhan không có vòng lặp; Ban Giám hiệu là gốc duy nhất.
 // ==============================================================================
 
 datasource db {
@@ -19,631 +28,906 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
-enum RoleScope {
-  SYSTEM
-  WORKSPACE
-  PROJECT
+// ─── ENUM ─────────────────────────────────────────────────────────────────────
+
+enum NhomDonVi {
+  DAO_TAO
+  CHUC_NANG
+  SU_NGHIEP
 }
 
-enum PriorityLevel {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
+enum LoaiBoPhan {
+  BAN_GIAM_HIEU
+  KHOA
+  BO_MON
+  PHONG
+  VIEN
+  TRUNG_TAM
+  THU_VIEN
+  TRUONG //Trường
 }
 
-enum OutputType {
-  DOCUMENT
-  LINK
-  OTHER
+enum CapBac {
+  TRUONG //Trưởng
+  PHO // Phó
+  THANH_VIEN //Giảng viên or nhân viên or ...
 }
 
-enum EvidenceStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
+enum PhamViVaiTro {
+  HE_THONG
+  BO_PHAN
+  DE_TAI
 }
 
-// DRAFT     : tu danh gia ban than minh
-// SUBMITTED : nop ban tu danh gia, cho reviewer cham
-// REVIEWING : tat ca reviewer da cham, chua duyet
-// COMPLETED : tat ca reviewer da cham xong (khong co buoc duyet cuoi)
-enum EvaluationStatus {
-  DRAFT
-  SUBMITTED
-  REVIEWING
-  COMPLETED
+enum MucUuTien {
+  THAP
+  TRUNG_BINH
+  CAO
+  KHAN_CAP
 }
 
-model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
-  name      String
-  avatar    String?
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
-  updatedAt DateTime  @updatedAt
-
-  ownedWorkspaces      Workspace[]          @relation("WorkspaceOwner")
-  systemRoles          UserRole[]
-  workspaceMemberships WorkspaceMember[]
-  createdProjects      Project[]            @relation("ProjectCreator")
-  projectMemberships   ProjectMember[]
-  createdTasks         Task[]               @relation("TaskCreator")
-  taskAssignees        TaskAssignee[]
-  submittedEvidence    Evidence[]           @relation("EvidenceSubmitter")
-  reviewedEvidence     Evidence[]           @relation("EvidenceReviewer")
-  userEvaluation       Evaluation[]         @relation("EvaluatedUser")
-  evaluationReviews    EvaluationReviewer[]
+enum NguonTaoNhiemVu {
+  TU_DANG_KY
+  DUOC_GIAO
 }
 
-// Permission la quyen nho nhat trong he thong.
-// Permission duoc gan cho Role, khong gan truc tiep cho User.
-model Permission {
-  id          String   @id @default(uuid())
-  key         String   @unique
-  description String?
-  createdAt   DateTime @default(now())
-
-  roles RolePermission[]
+enum LoaiDeTai {
+  DE_TAI
+  DE_AN
 }
 
-// Role CHI do SUPER_ADMIN tao, dung chung toan he thong (workspaceId = null):
-// SUPER_ADMIN (SYSTEM), OWNER / WORKSPACE_MANAGER / MEMBER (WORKSPACE),
-// PROJECT_LEAD / PROJECT_MEMBER (PROJECT).
-// Workspace chi "bat" cac Role nay qua WorkspaceRole, khong tu tao Role rieng.
-// Quyen cua mot User trong Project = quyen Role workspace HOP quyen Role project.
-model Role {
-  id          String    @id @default(uuid())
-  key         String    @unique // Key co dinh (SUPER_ADMIN, OWNER, WORKSPACE_MANAGER, MEMBER, PROJECT_LEAD, PROJECT_MEMBER) de upsert luc seed va tra role trong code.
-  name        String
-  scope       RoleScope
-  workspaceId String?
-  isSystem    Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  workspace      Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  permissions    RolePermission[]
-  systemUsers    UserRole[]
-  workspaceUsers WorkspaceMember[]
-  projectUsers   ProjectMember[]
-  enabledIn      WorkspaceRole[]
-
-  @@unique([workspaceId, name])
+enum LoaiDauRa {
+  TAI_LIEU
+  LIEN_KET
+  KHAC
 }
 
-// Gan Permission cho Role (khong phai gan role vao workspace)
-model RolePermission {
-  roleId       String
-  permissionId String
-
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@id([roleId, permissionId])
+enum TrangThaiMinhChung {
+  CHO_DUYET
+  DA_CHAP_NHAN
+  BI_TRA_LAI
 }
 
-// Chi dung de gan Role cap he thong cho User, vi du SUPER_ADMIN.
-model UserRole {
-  userId String
-  roleId String
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([userId, roleId])
+enum TrangThaiVanBan {
+  CON_HIEU_LUC
+  HET_HIEU_LUC
+  DA_AN
 }
 
-model Workspace {
-  id        String    @id @default(uuid())
-  name      String
-  ownerId   String
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
-  updatedAt DateTime  @updatedAt
-
-  // Sau nay dem quota chi can count({ ownerId, deletedAt: null }).
-  // Khi chuyen nhuong owner phai cap nhat ca ownerId lan role OWNER trong WorkspaceMember, trong cung mot transaction.
-  owner              User                 @relation("WorkspaceOwner", fields: [ownerId], references: [id])
-  members            WorkspaceMember[]
-  projects           Project[]
-  tasks              Task[]
-  workflows          Workflow[]
-  roles              Role[]
-  enabledRoles       WorkspaceRole[]
-  objectives         Objective[]
-  metrics            Metric[]
-  formulas           Formula[]
-  evaluationPeriods  EvaluationPeriod[]
-  classificationRule ClassificationRule[]
-
-  @@index([ownerId, deletedAt])
+enum LoaiPheDuyet { //Trừ cái giao việc từ trên xuống
+  GIAO_NGANG
+  DANG_KY
 }
 
-// User thuoc Workspace thong qua bang nay.
-// roleId phai tro den Role co pham vi WORKSPACE.
-// Moi User chi co mot Role trong mot Workspace o thiet ke hien tai.
-model WorkspaceMember {
-  userId      String
-  workspaceId String
-  roleId      String
-  joinedAt    DateTime  @default(now())
-  deletedAt   DateTime?
-
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  role      Role      @relation(fields: [roleId], references: [id], onDelete: NoAction)
-
-  @@id([userId, workspaceId])
+enum TrangThaiPheDuyet {
+  CHO_DUYET
+  DA_DUYET
+  TU_CHOI
 }
 
-// Role phai duoc bat trong Workspace truoc khi gan Role do cho thanh vien
-// (Role scope WORKSPACE -> WorkspaceMember, scope PROJECT -> ProjectMember).
-// Role OWNER chi duoc gan qua chuc nang chuyen nhuong owner, khong gan thu cong.
-// Viec kiem tra Role co dung scope va dung Workspace phai xu ly o service.
-model WorkspaceRole {
-  workspaceId String
-  roleId      String
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  role      Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([workspaceId, roleId])
+enum NhomChiSo {
+  MUC_TIEU // nhập khi tạo nhiệm vụ (ví dụ muc_tieu)
+  KET_QUA // nhập khi hoàn thành (ví dụ thuc_te)
 }
 
-model Project {
-  id          String    @id @default(uuid())
-  workspaceId String
-  createdById String
-  name        String
-  description String?
-  createdAt   DateTime  @default(now())
-  deletedAt   DateTime?
-  updatedAt   DateTime  @updatedAt
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  createdBy User      @relation("ProjectCreator", fields: [createdById], references: [id])
-
-  members    ProjectMember[]
-  tasks      Task[]
-  objectives Objective[]
-  workflow   Workflow?
+enum CapApDungCongThuc {
+  NHIEM_VU
+  KY
 }
 
-// Danh sach thanh vien rieng cua Project.
-// Workspace Owner khong bat buoc phai xuat hien trong bang nay.
-// Workspace Member khong phai ProjectMember van co the xem Project,
-// nhung khong duoc thao tac neu khong co Permission va pham vi phu hop.
-// roleId phai tro den Role co pham vi PROJECT (PROJECT_LEAD hoac PROJECT_MEMBER).
-// Viec kiem tra scope cua Role phai xu ly o service.
-model ProjectMember {
-  projectId String
-  userId    String
-  roleId    String
-  joinedAt  DateTime  @default(now())
-  deletedAt DateTime?
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role    Role    @relation(fields: [roleId], references: [id], onDelete: NoAction)
-
-  @@id([projectId, userId])
+enum KieuChamTieuChi {
+  NHI_PHAN // đảm bảo hoặc không: đạt tối đa hoặc 0
+  DIEM
 }
 
-model Task {
-  id          String        @id @default(uuid())
-  title       String
-  description String?
-  priority    PriorityLevel @default(MEDIUM)
-  status      String        @default("TODO")
-  dueDate     DateTime?
-
-  //Mo ta them ve ban than nhiem vu do 
-  customFields Json?
-
-  // Task luon thuoc 1 Workspace. projectId = null: task ngoai project (viec ca nhan / viec chung).
-  workspaceId String
-  projectId   String?
-  createdById String
-
-  // De co the tao SubTask -> Task
-  parentId String?
-
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
-  updatedAt DateTime  @updatedAt
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  project   Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  createdBy User      @relation("TaskCreator", fields: [createdById], references: [id])
-
-  // De co the quan he cha con voi subtask
-  parentTask Task?  @relation("TaskHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  subTasks   Task[] @relation("TaskHierarchy")
-
-  taskAssignees    TaskAssignee[]
-  taskKeyResults   TaskKeyResult[]
-  taskOutputs      TaskOutput[]
-  formula          Formula?          @relation(fields: [formulaId], references: [id], onDelete: SetNull)
-  formulaId        String?
-  taskMetricValues TaskMetricValue[]
-  kpiSnapshot      KPISnapshot?
-
-  @@index([workspaceId, projectId])
+// NHAP -> DA_NOP -> DANG_CHAM -> CHO_XAC_NHAN -> HOAN_TAT
+// Phiếu của Trưởng gốc (Hiệu trưởng): nộp xong là HOAN_TAT.
+enum TrangThaiPhieu {
+  NHAP
+  DA_NOP
+  DANG_CHAM
+  CHO_XAC_NHAN
+  HOAN_TAT
 }
 
-model TaskAssignee {
-  taskId     String
-  userId     String
-  assignedAt DateTime @default(now())
-
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([taskId, userId])
+enum LoaiNguoiCham {
+  CHAM
+  XAC_NHAN
 }
 
-model Objective {
-  id          String  @id @default(uuid())
-  title       String
-  description String?
-
-  startDate DateTime?
-  endDate   DateTime?
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
-  updatedAt DateTime  @updatedAt
-
-  projectId String?
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  keyResults KeyResult[]
+enum LoaiNhapExcel {
+  BO_PHAN
+  NGUOI_DUNG
+  NHIEM_VU
+  DE_TAI
 }
 
-model KeyResult {
-  id          String  @id @default(uuid())
-  title       String
-  description String?
-
-  startValue   Float @default(0)
-  currentValue Float @default(0)
-  targetValue  Float
-
-  unit String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  objectiveId String
-  objective   Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
-
-  taskLinks TaskKeyResult[]
+enum TrangThaiPhienNhap { //Phiên nhập
+  XEM_TRUOC
+  DA_DUYET
+  DA_HUY
+  LOI
 }
 
-model TaskKeyResult {
-  taskId String
-  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+// ─── NHÓM A: TỔ CHỨC VÀ PHÂN QUYỀN (7 bảng) ───────────────────────────────────
 
-  keyResultId String
-  keyResult   KeyResult @relation(fields: [keyResultId], references: [id], onDelete: Cascade)
-
-  @@id([taskId, keyResultId])
-}
-
-//Dau ra san pham cua Task
-model TaskOutput {
-  id           String     @id @default(uuid())
-  title        String
-  description  String?
-  expectedType OutputType @default(DOCUMENT)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-
-  taskId String
-  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  evidences Evidence[]
-}
-
-// Minh chung cho viec hoan thanh Task
-// RULE O SERVICE: Khong duoc phep xoa Evidence neu status dang la ACCEPTED
-model Evidence {
-  id         String         @id @default(uuid())
-  fileUrl    String //tai vi dung clound nen phai co thang cha nay de save cai url clound
-  fileName   String?
-  mimeType   String?
-  status     EvidenceStatus @default(PENDING)
-  reviewNote String?
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
-
-  taskOutputId String
-  taskOutput   TaskOutput @relation(fields: [taskOutputId], references: [id], onDelete: Cascade)
-
-  uploadedById String
-  uploadedBy   User     @relation("EvidenceSubmitter", fields: [uploadedById], references: [id], onDelete: Cascade)
-  uploadedAt   DateTime @default(now())
-
-  reviewedById String?
-  reviewedBy   User?     @relation("EvidenceReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
-  reviewedAt   DateTime?
-}
-
-// Metric duoc tao ra trong 1 Workspace, duoc su dung trong cac Task thuoc Workspace do
-// Khi tao Task chi can chon Metric nao su dung ma khong can khai bao lai
-// Metric dung cho viec tinh diem, duoc su dung trong Formula de tinh diem
-// Metric khong the xoa neu dang duoc su dung trong Task
-model Metric {
-  id          String  @id @default(uuid())
-  key         String
-  name        String
-  description String?
-  unit        String?
-
-  workspaceId      String
-  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  taskMetricValues TaskMetricValue[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Tùng key được gán 1 lần duy nhất trong 1 workspace
-  @@unique([workspaceId, key])
-}
-
-model Formula {
-  id         String @id @default(uuid())
-  name       String
-  //Chuoi cong thuc
-  expression String //so_commit * 0.4 + so_bai_bao * 0.6
-
-  description String?
-  version     Int     @default(1)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  tasks       Task[]
-}
-
-//cac gia tri metric duoc nhap trong tung task thuoc Workspace dung cho viec tinh diem
-model TaskMetricValue {
-  id String @id @default(uuid())
-
-  taskId String
-  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  metricId String
-  metric   Metric @relation(fields: [metricId], references: [id], onDelete: NoAction)
-
-  value Float @default(0)
-
-  @@unique([taskId, metricId])
-}
-
-model KPISnapshot {
-  id String @id @default(uuid())
-
-  taskId String @unique
-  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  //diem cuoi cung
-  finalScore   Float
-  //cong thuc tinh ra cai diem do
-  expression   String
-  //phien ban cong thuc nao
-  version      Int
-  //cac gia tri metric duoc nhap de tinh ra diem
-  metricValues Json
-
-  calculatedAt DateTime @default(now())
-}
-
-// Ky danh gia
-// RULE O SERVICE: Khong duoc phep xoa Ky danh gia neu da co phieu Evaluation o trang thai SUBMITTED tro len
-model EvaluationPeriod {
-  id        String   @id @default(uuid())
-  name      String
-  //khoang thoi gian danh gia
-  startDate DateTime
-  endDate   DateTime
-
-  //ty trong cu cac tieu chi danh gia
-  kpiWeight      Float @default(0.6)
-  criteriaWeight Float @default(0.4)
-
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  evaluations Evaluation[]
-  criteria    EvaluationCriteria[]
-}
-
-//tieu chi phu
-model EvaluationCriteria {
-  id          String  @id @default(uuid())
-  name        String
-  description String?
-  maxScore    Float   @default(10)
-
-  periodId String
-  period   EvaluationPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
-
-  results        EvaluationCriteriaResult[]
-  reviewerScores EvaluationReviewerScore[]
-}
-
-//Bang danh gia
-model Evaluation {
-  id String @id @default(uuid())
-
-  periodId String
-  period   EvaluationPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
-
-  userId String
-  user   User   @relation("EvaluatedUser", fields: [userId], references: [id], onDelete: Cascade)
-
-  status EvaluationStatus @default(DRAFT)
-
-  //3 cot diem
-  kpiScore      Float @default(0)
-  criteriaScore Float @default(0)
-  finalScore    Float @default(0)
-
-  //danh hieu / xep loai
-  classification String?
-
-  //tu danh gia ban than
-  selfComment String?
-
-  // Nhieu reviewer cho moi phieu: Lead cham thanh vien, Manager cham Lead,
-  // Hoi dong (workspace cap truong) cham Manager. Diem reviewer = trung binh cac reviewer.
-  reviewers       EvaluationReviewer[]
-  criteriaResults EvaluationCriteriaResult[]
-
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
-  updatedAt DateTime  @updatedAt
-
-  //moi 1 phieu danh gia chi duoc xuat hien 1 lan trong 1 ky danh gia, thuoc 1 user
-  @@unique([periodId, userId])
-}
-
-//Ket qua chi tiet cua tieu chi phu trong danh gia
-model EvaluationCriteriaResult {
-  id String @id @default(uuid())
-
-  evaluationId String
-  evaluation   Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
-
-  evaluationCriteriaId String
-  evaluationCriteria   EvaluationCriteria @relation(fields: [evaluationCriteriaId], references: [id], onDelete: Cascade)
-
-  selfScore Float   @default(0) // Điểm tự chấm
-  comment   String? // Nhận xét tự đánh giá cho tiêu chí này
-
-  @@unique([evaluationId, evaluationCriteriaId])
-}
-
-// Danh sach reviewer cua 1 phieu danh gia (moi reviewer 1 dong).
-// Reviewer co the thuoc workspace khac (vd Hoi dong cap truong cham Manager cua Khoa),
-// nen quyen cham dua tren viec duoc gan o day, khong dua tren role trong workspace cua phieu.
-model EvaluationReviewer {
-  evaluationId String
-  reviewerId   String
-
-  comment    String? // Nhan xet chung cua reviewer nay
-  reviewedAt DateTime? // null = chua cham xong
+// Không có password (đăng nhập passwordless). Không lưu chức vụ Đảng và đoàn thể.
+model NguoiDung {
+  id         String    @id @default(uuid())
+  email      String    @unique
+  ten        String
+  anhDaiDien String?
+  ngaySinh   DateTime? @db.Date
   createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
 
-  evaluation Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
-  reviewer   User       @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  vaiTroHeThong    NguoiDungVaiTro[]
+  thanhVienBoPhan  ThanhVienBoPhan[]
+  thanhVienDeTai   ThanhVienDeTai[]
+  tepTinTaiLen     TepTin[]
+  vanBanTaiLen     VanBan[]
+  nhiemVuDaTao     NhiemVu[]              @relation("NhiemVuNguoiTao")
+  nhiemVuThucHien  NhiemVuNguoiThucHien[] @relation("NguoiThucHien")
+  nhiemVuDaGiao    NhiemVuNguoiThucHien[] @relation("NguoiGiao")
+  pheDuyetDaYeuCau PheDuyetNhiemVu[]      @relation("PheDuyetNguoiYeuCau")
+  pheDuyetDaXuLy   PheDuyetNhiemVu[]      @relation("PheDuyetNguoiDuyet")
+  minhChungDaNop   MinhChung[]            @relation("MinhChungNguoiNop")
+  minhChungDaDuyet MinhChung[]            @relation("MinhChungNguoiDuyet")
+  phieuDanhGia     PhieuDanhGia[]         @relation("PhieuNguoiDuocDanhGia")
+  phieuDaXacNhan   PhieuDanhGia[]         @relation("PhieuNguoiXacNhan")
+  phieuDaCham      NguoiChamPhieu[]
+  thongBao         ThongBao[]
+  phienNhapExcel   PhienNhapExcel[]
 
-  scores EvaluationReviewerScore[]
-
-  @@id([evaluationId, reviewerId])
+  @@index([deletedAt])
 }
 
-// Diem tung tieu chi do tung reviewer cham
-model EvaluationReviewerScore {
-  evaluationId         String
-  reviewerId           String
-  evaluationCriteriaId String
+// Mọi ô trong cây tổ chức (Ban Giám hiệu, Khoa, Bộ môn, Phòng, Viện, Trung tâm...).
+// nhom: nhãn Đào tạo / Chức năng / Sự nghiệp, null cho Ban Giám hiệu.
+// Bộ môn của một Khoa có boPhanChaId là Khoa đó; bộ môn độc lập có cha là Ban Giám hiệu.
+model BoPhan {
+  id            String     @id @default(uuid())
+  ma            String     @unique
+  ten           String
+  loai          LoaiBoPhan
+  nhom          NhomDonVi?
+  boPhanChaId   String?
+  ngungHoatDong Boolean    @default(false)
+  thongTinThem  Json?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
-  score   Float   @default(0)
-  comment String?
+  boPhanCha BoPhan?  @relation("CayBoPhan", fields: [boPhanChaId], references: [id], onDelete: Restrict)
+  boPhanCon BoPhan[] @relation("CayBoPhan")
 
-  reviewer           EvaluationReviewer @relation(fields: [evaluationId, reviewerId], references: [evaluationId, reviewerId], onDelete: Cascade)
-  evaluationCriteria EvaluationCriteria @relation(fields: [evaluationCriteriaId], references: [id], onDelete: Cascade)
+  thanhVien      ThanhVienBoPhan[]
+  vanBanQuanLy   VanBan[]
+  deTaiChuTri    DeTaiDeAn[]
+  deTaiPhoiHop   DeTaiBoPhan[]
+  nhiemVuQuanLy  NhiemVu[]
+  nhiemVuThayMat NhiemVuNguoiThucHien[]
+  pheDuyetGiao   PheDuyetNhiemVu[]      @relation("PheDuyetBoPhanGiao")
+  pheDuyetNhan   PheDuyetNhiemVu[]      @relation("PheDuyetBoPhanNhan")
+  pheDuyetDuyet  PheDuyetNhiemVu[]      @relation("PheDuyetBoPhanDuyet")
+  quyTrinh       QuyTrinh?
+  mucTieu        MucTieu[]
+  chiSo          ChiSo[]
+  congThuc       CongThuc[]
+  cauHinhKy      CauHinhKyBoPhan[]
+  tieuChi        TieuChiDanhGia[]
+  quyTacXepLoai  QuyTacXepLoai[]
+  phieuDanhGia   PhieuDanhGia[]
 
-  @@id([evaluationId, reviewerId, evaluationCriteriaId])
+  @@index([boPhanChaId])
+  @@index([loai])
 }
 
-//Rule cua thang danh gia
-model ClassificationRule {
-  id String @id @default(uuid())
+// Một người có thể thuộc nhiều bộ phận (kiêm nhiệm), mỗi bộ phận một vai trò.
+// Đổi vai trò là sửa dòng, không lưu lịch sử vai trò.
+model ThanhVienBoPhan {
+  nguoiDungId String
+  boPhanId    String
+  vaiTroId    String
+  capBac      CapBac
+  ngayThamGia DateTime  @default(now())
+  ngayKetThuc DateTime?
 
-  //A, B, C, D,.. A++,A+,B-
-  grade String
-  //Excellent, Good, Average, Bad
-  label String
+  nguoiDung NguoiDung @relation(fields: [nguoiDungId], references: [id], onDelete: Cascade)
+  boPhan    BoPhan    @relation(fields: [boPhanId], references: [id], onDelete: Cascade)
+  vaiTro    VaiTro    @relation(fields: [vaiTroId], references: [id], onDelete: Restrict)
 
-  minScore Float
-  maxScore Float
-
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  @@id([nguoiDungId, boPhanId])
+  @@index([boPhanId, capBac])
+  @@index([vaiTroId])
 }
 
-// Custom Workflow
-// projectId != null : workflow rieng cua Project
-// projectId  = null : workflow mac dinh cho task ngoai project cua Workspace
-//                     (moi Workspace toi da 1 workflow mac dinh -> kiem tra o service,
-//                      Prisma khong co partial unique index)
-model Workflow {
+// Vai trò KHÔNG dùng chung giữa các loại bộ phận; mỗi vai trò có bộ quyền riêng.
+// ten chính là chức vụ hiển thị (Trưởng khoa, Phó phòng, Giảng viên...).
+// capBac chỉ để thuật toán (chuỗi chấm, duyệt giao ngang) nhận biết cấp bậc.
+// loaiBoPhan và capBac bắt buộc khi phamVi = BO_PHAN (kiểm tra ở service).
+model VaiTro {
+  id           String       @id @default(uuid())
+  ma           String       @unique
+  ten          String
+  phamVi       PhamViVaiTro
+  loaiBoPhan   LoaiBoPhan?
+  capBac       CapBac?
+  soLuongToiDa Int? // số người tối đa giữ vai trò này trong một bộ phận; null = không giới hạn
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  quyenHan         VaiTroQuyenHan[]
+  nguoiDungHeThong NguoiDungVaiTro[]
+  thanhVienBoPhan  ThanhVienBoPhan[]
+  thanhVienDeTai   ThanhVienDeTai[]
+
+  @@index([phamVi, loaiBoPhan])
+}
+
+model QuyenHan {
+  id        String   @id @default(uuid())
+  ma        String   @unique // ví dụ van_ban.tai_len
+  moTa      String?
+  createdAt DateTime @default(now())
+
+  vaiTro VaiTroQuyenHan[]
+}
+
+// Quyền gắn cho vai trò, không gắn trực tiếp cho người.
+model VaiTroQuyenHan {
+  vaiTroId   String
+  quyenHanId String
+
+  vaiTro   VaiTro   @relation(fields: [vaiTroId], references: [id], onDelete: Cascade)
+  quyenHan QuyenHan @relation(fields: [quyenHanId], references: [id], onDelete: Cascade)
+
+  @@id([vaiTroId, quyenHanId])
+}
+
+// Chỉ dùng cho vai trò cấp hệ thống (ADMIN).
+model NguoiDungVaiTro {
+  nguoiDungId String
+  vaiTroId    String
+
+  nguoiDung NguoiDung @relation(fields: [nguoiDungId], references: [id], onDelete: Cascade)
+  vaiTro    VaiTro    @relation(fields: [vaiTroId], references: [id], onDelete: Cascade)
+
+  @@id([nguoiDungId, vaiTroId])
+}
+
+// ─── NHÓM B: TỆP VÀ VĂN BẢN (5 bảng) ──────────────────────────────────────────
+
+// Lưu khóa lưu trữ (key) chứ không lưu URL đầy đủ. Dùng chung cho văn bản và minh chứng.
+model TepTin {
+  id            String   @id @default(uuid())
+  tenGoc        String
+  mimeType      String
+  kichThuoc     Int // byte
+  khoaLuuTru    String //key URL
+  nhaCungCap    String // ví dụ B2, SUPABASE. Có thể sẽ xài 2 thằng vì quá nghèo
+  nguoiTaiLenId String
+  taiLenLuc     DateTime @default(now())
+
+  nguoiTaiLen NguoiDung   @relation(fields: [nguoiTaiLenId], references: [id], onDelete: Restrict)
+  vanBan      VanBan[]
+  minhChung   MinhChung[]
+
+  @@unique([nhaCungCap, khoaLuuTru])
+  @@index([nguoiTaiLenId])
+}
+
+// Danh sách cố định, người có thẩm quyền thêm bớt. Không xóa loại đang dùng (chỉ tắt dangDung).
+model LoaiVanBan {
+  id       String  @id @default(uuid())
+  ma       String  @unique
+  ten      String
+  moTa     String?
+  thuTu    Int     @default(0)
+  dangDung Boolean @default(true)
+
+  vanBan VanBan[]
+}
+
+// Mọi người xem được; tải lên cần quyền. Hiệu lực và phiên bản nằm trong file PDF,
+// hệ thống chỉ giữ trangThai để người tải lên chỉnh khả năng hiển thị.
+model VanBan {
+  id             String          @id @default(uuid())
+  soHieu         String?
+  trichYeu       String
+  loaiVanBanId   String
+  coQuanBanHanh  String?
+  ngayBanHanh    DateTime?       @db.Date
+  boPhanQuanLyId String?
+  tepTinId       String
+  trangThai      TrangThaiVanBan @default(CON_HIEU_LUC)
+  nguoiTaiLenId  String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  loaiVanBan   LoaiVanBan @relation(fields: [loaiVanBanId], references: [id], onDelete: Restrict)
+  boPhanQuanLy BoPhan?    @relation(fields: [boPhanQuanLyId], references: [id], onDelete: SetNull)
+  tepTin       TepTin     @relation(fields: [tepTinId], references: [id], onDelete: Restrict)
+  nguoiTaiLen  NguoiDung  @relation(fields: [nguoiTaiLenId], references: [id], onDelete: Restrict)
+
+  nhiemVu VanBanNhiemVu[]
+  deTai   VanBanDeTai[]
+
+  @@index([loaiVanBanId])
+  @@index([trangThai])
+  @@index([boPhanQuanLyId])
+}
+
+// Văn bản căn cứ giao việc, không bắt buộc với nhiệm vụ lẻ.
+model VanBanNhiemVu {
+  vanBanId  String
+  nhiemVuId String
+
+  vanBan  VanBan  @relation(fields: [vanBanId], references: [id], onDelete: Cascade)
+  nhiemVu NhiemVu @relation(fields: [nhiemVuId], references: [id], onDelete: Cascade)
+
+  @@id([vanBanId, nhiemVuId])
+}
+
+// Cần ít nhất 1 văn bản để kích hoạt đề tài/đề án (cờ cấu hình, kiểm tra ở service).
+model VanBanDeTai {
+  vanBanId String
+  deTaiId  String
+
+  vanBan VanBan    @relation(fields: [vanBanId], references: [id], onDelete: Cascade)
+  deTai  DeTaiDeAn @relation(fields: [deTaiId], references: [id], onDelete: Cascade)
+
+  @@id([vanBanId, deTaiId])
+}
+
+// ─── NHÓM C: ĐỀ TÀI/ĐỀ ÁN VÀ NHIỆM VỤ (8 bảng) ────────────────────────────────
+
+// Một bảng cho cả đề tài và đề án; trường riêng từng loại nằm trong thongTinThem.
+// ma tự sinh (ví dụ DT-2026-001). daKichHoat là đề xuất trong đặc tả.
+model DeTaiDeAn {
+  id             String    @id @default(uuid())
+  ma             String    @unique
+  ten            String
+  moTa           String?
+  loai           LoaiDeTai
+  boPhanChuTriId String
+  ngayBatDau     DateTime? @db.Date
+  ngayKetThuc    DateTime? @db.Date
+  daKichHoat     Boolean   @default(false)
+  thongTinThem   Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  boPhanChuTri  BoPhan           @relation(fields: [boPhanChuTriId], references: [id], onDelete: Restrict)
+  boPhanPhoiHop DeTaiBoPhan[]
+  thanhVien     ThanhVienDeTai[]
+  nhiemVu       NhiemVu[]
+  vanBan        VanBanDeTai[]
+
+  @@index([boPhanChuTriId])
+  @@index([deletedAt])
+}
+
+// Các bộ phận phối hợp (đề tài liên bộ phận).
+model DeTaiBoPhan {
+  deTaiId  String
+  boPhanId String
+
+  deTai  DeTaiDeAn @relation(fields: [deTaiId], references: [id], onDelete: Cascade)
+  boPhan BoPhan    @relation(fields: [boPhanId], references: [id], onDelete: Cascade)
+
+  @@id([deTaiId, boPhanId])
+}
+
+// Đúng 1 chủ nhiệm (vaiTro CHU_NHIEM), kiểm tra ở service.
+model ThanhVienDeTai {
+  deTaiId     String
+  nguoiDungId String
+  vaiTroId    String
+
+  deTai     DeTaiDeAn @relation(fields: [deTaiId], references: [id], onDelete: Cascade)
+  nguoiDung NguoiDung @relation(fields: [nguoiDungId], references: [id], onDelete: Cascade)
+  vaiTro    VaiTro    @relation(fields: [vaiTroId], references: [id], onDelete: Restrict)
+
+  @@id([deTaiId, nguoiDungId])
+}
+
+// buocQuyTrinhId là trạng thái TỔNG; trạng thái riêng từng người nằm ở NhiemVuNguoiThucHien.
+// deTaiId null = nhiệm vụ lẻ. coHieuLuc = false khi đang chờ duyệt (đề xuất).
+// moTaKpi mô tả KPI bằng chữ (ví dụ "lập được thời khóa biểu cho DH24PM").
+model NhiemVu {
+  id             String          @id @default(uuid())
+  ma             String          @unique
+  tieuDe         String
+  moTa           String?
+  mucUuTien      MucUuTien       @default(TRUNG_BINH)
+  hanHoanThanh   DateTime?
+  nguonTao       NguonTaoNhiemVu @default(DUOC_GIAO)
+  moTaKpi        String?
+  thongTinThem   Json?
+  boPhanQuanLyId String
+  deTaiId        String?
+  nhiemVuChaId   String?
+  nguoiTaoId     String
+  congThucId     String?
+  buocQuyTrinhId String?
+  coHieuLuc      Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+
+  boPhanQuanLy BoPhan        @relation(fields: [boPhanQuanLyId], references: [id], onDelete: Restrict)
+  deTai        DeTaiDeAn?    @relation(fields: [deTaiId], references: [id], onDelete: Restrict)
+  nhiemVuCha   NhiemVu?      @relation("CayNhiemVu", fields: [nhiemVuChaId], references: [id], onDelete: Cascade)
+  nhiemVuCon   NhiemVu[]     @relation("CayNhiemVu")
+  nguoiTao     NguoiDung     @relation("NhiemVuNguoiTao", fields: [nguoiTaoId], references: [id], onDelete: Restrict)
+  congThuc     CongThuc?     @relation(fields: [congThucId], references: [id], onDelete: Restrict)
+  buocQuyTrinh BuocQuyTrinh? @relation("NhiemVuBuocTong", fields: [buocQuyTrinhId], references: [id], onDelete: Restrict)
+
+  nguoiThucHien NhiemVuNguoiThucHien[]
+  pheDuyet      PheDuyetNhiemVu[]
+  dauRa         DauRaNhiemVu[]
+  vanBan        VanBanNhiemVu[]
+  ketQuaChinh   NhiemVuKetQuaChinh[]
+
+  @@index([boPhanQuanLyId, deTaiId])
+  @@index([nhiemVuChaId])
+  @@index([hanHoanThanh])
+  @@index([deletedAt])
+}
+
+// Trạng thái và KPI theo từng người. boPhanId = người này làm thay mặt bộ phận nào.
+model NhiemVuNguoiThucHien {
+  nhiemVuId      String
+  nguoiDungId    String
+  boPhanId       String
+  buocQuyTrinhId String?
+  nguoiGiaoId    String?
+  ngayGiao       DateTime  @default(now())
+  ngayHoanThanh  DateTime?
+
+  nhiemVu      NhiemVu       @relation(fields: [nhiemVuId], references: [id], onDelete: Cascade)
+  nguoiDung    NguoiDung     @relation("NguoiThucHien", fields: [nguoiDungId], references: [id], onDelete: Cascade)
+  boPhan       BoPhan        @relation(fields: [boPhanId], references: [id], onDelete: Restrict)
+  buocQuyTrinh BuocQuyTrinh? @relation("NguoiThucHienBuoc", fields: [buocQuyTrinhId], references: [id], onDelete: Restrict)
+  nguoiGiao    NguoiDung?    @relation("NguoiGiao", fields: [nguoiGiaoId], references: [id], onDelete: SetNull)
+
+  giaTriChiSo GiaTriChiSo[]
+  kpiChot     KpiChot?
+
+  @@id([nhiemVuId, nguoiDungId])
+  @@index([nguoiDungId])
+  @@index([boPhanId])
+}
+
+// Lưu lịch sử từng lần (từ chối rồi gửi lại). Dùng cho giao ngang và tự đăng ký.
+// GIAO_NGANG: boPhanDuyetId = bộ phận tổ tiên chung gần nhất của hai bên.
+// DANG_KY: boPhanGiaoId và boPhanNhanId để trống, boPhanDuyetId = bộ phận quản lý nhiệm vụ.
+model PheDuyetNhiemVu {
+  id             String            @id @default(uuid())
+  nhiemVuId      String
+  loai           LoaiPheDuyet
+  boPhanGiaoId   String?
+  boPhanNhanId   String?
+  boPhanDuyetId  String
+  trangThai      TrangThaiPheDuyet @default(CHO_DUYET)
+  nguoiYeuCauId  String
+  nguoiDuyetId   String?
+  lyDo           String?
+  thoiGianYeuCau DateTime          @default(now())
+  thoiGianXuLy   DateTime?
+
+  nhiemVu     NhiemVu    @relation(fields: [nhiemVuId], references: [id], onDelete: Cascade)
+  boPhanGiao  BoPhan?    @relation("PheDuyetBoPhanGiao", fields: [boPhanGiaoId], references: [id], onDelete: Restrict)
+  boPhanNhan  BoPhan?    @relation("PheDuyetBoPhanNhan", fields: [boPhanNhanId], references: [id], onDelete: Restrict)
+  boPhanDuyet BoPhan     @relation("PheDuyetBoPhanDuyet", fields: [boPhanDuyetId], references: [id], onDelete: Restrict)
+  nguoiYeuCau NguoiDung  @relation("PheDuyetNguoiYeuCau", fields: [nguoiYeuCauId], references: [id], onDelete: Restrict)
+  nguoiDuyet  NguoiDung? @relation("PheDuyetNguoiDuyet", fields: [nguoiDuyetId], references: [id], onDelete: SetNull)
+
+  @@index([nhiemVuId])
+  @@index([boPhanDuyetId, trangThai])
+}
+
+model DauRaNhiemVu {
+  id        String    @id @default(uuid())
+  nhiemVuId String
+  tieuDe    String
+  moTa      String?
+  loaiDauRa LoaiDauRa @default(TAI_LIEU)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  nhiemVu   NhiemVu     @relation(fields: [nhiemVuId], references: [id], onDelete: Cascade)
+  minhChung MinhChung[]
+
+  @@index([nhiemVuId])
+}
+
+// Không được xóa khi trangThai = DA_CHAP_NHAN (kiểm tra ở service).
+model MinhChung {
+  id           String             @id @default(uuid())
+  dauRaId      String
+  tepTinId     String
+  trangThai    TrangThaiMinhChung @default(CHO_DUYET)
+  ghiChuDuyet  String?
+  nguoiNopId   String
+  nopLuc       DateTime           @default(now())
+  nguoiDuyetId String?
+  duyetLuc     DateTime?
+
+  dauRa      DauRaNhiemVu @relation(fields: [dauRaId], references: [id], onDelete: Cascade)
+  tepTin     TepTin       @relation(fields: [tepTinId], references: [id], onDelete: Restrict)
+  nguoiNop   NguoiDung    @relation("MinhChungNguoiNop", fields: [nguoiNopId], references: [id], onDelete: Restrict)
+  nguoiDuyet NguoiDung?   @relation("MinhChungNguoiDuyet", fields: [nguoiDuyetId], references: [id], onDelete: SetNull)
+
+  @@index([dauRaId])
+  @@index([trangThai])
+}
+
+// ─── NHÓM D: QUY TRÌNH TRẠNG THÁI (3 bảng) ────────────────────────────────────
+
+// Mỗi bộ phận một quy trình (boPhanId duy nhất). boPhanId null = bản mẫu của ADMIN để
+// sao chép khi tạo bộ phận mới (đề xuất, chờ quyết định D2).
+model QuyTrinh {
+  id        String   @id @default(uuid())
+  ten       String
+  moTa      String?
+  boPhanId  String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  boPhan     BoPhan?        @relation(fields: [boPhanId], references: [id], onDelete: Cascade)
+  buoc       BuocQuyTrinh[]
+  chuyenBuoc ChuyenBuoc[]
+}
+
+// Không xóa bước đang có nhiệm vụ dùng (onDelete Restrict ở NhiemVu và NhiemVuNguoiThucHien).
+model BuocQuyTrinh {
+  id         String  @id @default(uuid())
+  quyTrinhId String
+  ten        String // TODO, IN_PROGRESS, REVIEW, DONE...
+  nhan       String // nhãn hiển thị: chưa làm, đang làm...
+  laBuocDau  Boolean @default(false)
+  laBuocCuoi Boolean @default(false)
+  mau        String?
+  thuTu      Int     @default(0)
+
+  quyTrinh      QuyTrinh               @relation(fields: [quyTrinhId], references: [id], onDelete: Cascade)
+  chuyenTu      ChuyenBuoc[]           @relation("ChuyenTuBuoc")
+  chuyenDen     ChuyenBuoc[]           @relation("ChuyenDenBuoc")
+  nhiemVuTong   NhiemVu[]              @relation("NhiemVuBuocTong")
+  nguoiThucHien NhiemVuNguoiThucHien[] @relation("NguoiThucHienBuoc")
+
+  @@unique([quyTrinhId, ten])
+  @@index([quyTrinhId, thuTu])
+}
+
+model ChuyenBuoc {
+  id         String  @id @default(uuid())
+  quyTrinhId String
+  tuBuocId   String
+  denBuocId  String
+  nhan       String?
+
+  quyTrinh QuyTrinh     @relation(fields: [quyTrinhId], references: [id], onDelete: Cascade)
+  tuBuoc   BuocQuyTrinh @relation("ChuyenTuBuoc", fields: [tuBuocId], references: [id], onDelete: Cascade)
+  denBuoc  BuocQuyTrinh @relation("ChuyenDenBuoc", fields: [denBuocId], references: [id], onDelete: Cascade)
+
+  @@unique([quyTrinhId, tuBuocId, denBuocId])
+}
+
+// ─── NHÓM E: OKR THEO BỘ PHẬN (3 bảng) ────────────────────────────────────────
+
+model MucTieu {
+  id          String    @id @default(uuid())
+  tieuDe      String
+  moTa        String?
+  ngayBatDau  DateTime? @db.Date
+  ngayKetThuc DateTime? @db.Date
+  boPhanId    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  boPhan      BoPhan        @relation(fields: [boPhanId], references: [id], onDelete: Restrict)
+  ketQuaChinh KetQuaChinh[]
+
+  @@index([boPhanId])
+  @@index([deletedAt])
+}
+
+model KetQuaChinh {
+  id            String   @id @default(uuid())
+  mucTieuId     String
+  tieuDe        String
+  moTa          String?
+  giaTriBatDau  Float    @default(0)
+  giaTriHienTai Float    @default(0)
+  giaTriMucTieu Float
+  donViDo       String? // đơn vị đo (tránh nhầm với "đơn vị" là nhóm)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  mucTieu MucTieu              @relation(fields: [mucTieuId], references: [id], onDelete: Cascade)
+  nhiemVu NhiemVuKetQuaChinh[]
+
+  @@index([mucTieuId])
+}
+
+model NhiemVuKetQuaChinh {
+  nhiemVuId     String
+  ketQuaChinhId String
+
+  nhiemVu     NhiemVu     @relation(fields: [nhiemVuId], references: [id], onDelete: Cascade)
+  ketQuaChinh KetQuaChinh @relation(fields: [ketQuaChinhId], references: [id], onDelete: Cascade)
+
+  @@id([nhiemVuId, ketQuaChinhId])
+}
+
+// ─── NHÓM F: KPI ĐỘNG (4 bảng) ────────────────────────────────────────────────
+
+// Chỉ số do từng bộ phận định nghĩa (điểm chuẩn, hệ số, mục tiêu, thực tế, tiến độ, chất lượng...).
+// khoa là khóa dùng trong công thức (ví dụ muc_tieu, thuc_te). Không xóa khi đang dùng.
+model ChiSo {
+  id        String    @id @default(uuid())
+  boPhanId  String
+  khoa      String
+  ten       String
+  moTa      String?
+  donViDo   String?
+  nhom      NhomChiSo
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  boPhan      BoPhan        @relation(fields: [boPhanId], references: [id], onDelete: Cascade)
+  giaTriChiSo GiaTriChiSo[]
+
+  @@unique([boPhanId, khoa])
+}
+
+// Hai tầng công thức: NHIEM_VU (từng nhiệm vụ cho từng người) và KY (tổng hợp KPI kỳ).
+// bieuThucToiDa là đề xuất: biểu thức tính điểm tối đa của nhiệm vụ (chốt ở S7, xem đặc tả mục 9).
+model CongThuc {
+  id            String            @id @default(uuid())
+  boPhanId      String
+  ten           String
+  bieuThuc      String // ví dụ diem_chuan * min(thuc_te / muc_tieu, 1)
+  bieuThucToiDa String?
+  moTa          String?
+  phienBan      Int               @default(1)
+  capApDung     CapApDungCongThuc @default(NHIEM_VU)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  boPhan    BoPhan            @relation(fields: [boPhanId], references: [id], onDelete: Cascade)
+  nhiemVu   NhiemVu[]
+  cauHinhKy CauHinhKyBoPhan[] @relation("CongThucKy")
+
+  @@index([boPhanId, capApDung])
+}
+
+// Giá trị chỉ số theo từng người thực hiện (khóa ngoại ghép tới NhiemVuNguoiThucHien).
+// Mục tiêu nhập một lần cho nhiệm vụ rồi chép cho từng người (đề xuất, xử lý ở service).
+model GiaTriChiSo {
+  id          String @id @default(uuid())
+  nhiemVuId   String
+  nguoiDungId String
+  chiSoId     String
+  giaTri      Float  @default(0)
+
+  nguoiThucHien NhiemVuNguoiThucHien @relation(fields: [nhiemVuId, nguoiDungId], references: [nhiemVuId, nguoiDungId], onDelete: Cascade)
+  chiSo         ChiSo                @relation(fields: [chiSoId], references: [id], onDelete: Restrict)
+
+  @@unique([nhiemVuId, nguoiDungId, chiSoId])
+}
+
+// Bản chụp mỗi lần chốt KPI: công thức, phiên bản và giá trị chỉ số tại thời điểm tính.
+// Không cho gỡ người thực hiện đã có KPI chốt (onDelete Restrict).
+model KpiChot {
+  id            String   @id @default(uuid())
+  nhiemVuId     String
+  nguoiDungId   String
+  diemDat       Float
+  diemToiDa     Float
+  bieuThuc      String
+  bieuThucToiDa String?
+  phienBan      Int
+  giaTriChiSo   Json
+  tinhLuc       DateTime @default(now())
+
+  nguoiThucHien NhiemVuNguoiThucHien @relation(fields: [nhiemVuId, nguoiDungId], references: [nhiemVuId, nguoiDungId], onDelete: Restrict)
+
+  @@unique([nhiemVuId, nguoiDungId])
+}
+
+// ─── NHÓM G: ĐÁNH GIÁ (8 bảng) ────────────────────────────────────────────────
+
+// Kỳ dùng chung toàn trường. Tỷ trọng mặc định là nháp, sửa được; cấu hình thật theo
+// (kỳ, bộ phận) ở CauHinhKyBoPhan.
+model KyDanhGia {
+  id                    String   @id @default(uuid())
+  ten                   String
+  ngayBatDau            DateTime @db.Date
+  ngayKetThuc           DateTime @db.Date
+  tyTrongKpiMacDinh     Float    @default(0.6)
+  tyTrongTieuChiMacDinh Float    @default(0.4)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  cauHinh CauHinhKyBoPhan[]
+  tieuChi TieuChiDanhGia[]
+  phieu   PhieuDanhGia[]
+}
+
+// Tổng hai tỷ trọng bằng 1 (kiểm tra ở service). congThucKyId = công thức tổng hợp KPI kỳ.
+model CauHinhKyBoPhan {
+  kyId           String
+  boPhanId       String
+  tyTrongKpi     Float
+  tyTrongTieuChi Float
+  congThucKyId   String?
+
+  ky         KyDanhGia @relation(fields: [kyId], references: [id], onDelete: Cascade)
+  boPhan     BoPhan    @relation(fields: [boPhanId], references: [id], onDelete: Cascade)
+  congThucKy CongThuc? @relation("CongThucKy", fields: [congThucKyId], references: [id], onDelete: SetNull)
+
+  @@id([kyId, boPhanId])
+}
+
+// Phân cấp (nhóm tiêu chí và tiêu chí). Nhóm cha có thể để diemToiDa = 0 (tự cộng từ con).
+model TieuChiDanhGia {
+  id           String          @id @default(uuid())
+  kyId         String
+  boPhanId     String
+  tieuChiChaId String?
+  ten          String
+  moTa         String?
+  kieuCham     KieuChamTieuChi @default(DIEM)
+  diemToiDa    Float           @default(0)
+  thuTu        Int             @default(0)
+
+  ky         KyDanhGia        @relation(fields: [kyId], references: [id], onDelete: Cascade)
+  boPhan     BoPhan           @relation(fields: [boPhanId], references: [id], onDelete: Cascade)
+  tieuChiCha TieuChiDanhGia?  @relation("CayTieuChi", fields: [tieuChiChaId], references: [id], onDelete: Cascade)
+  tieuChiCon TieuChiDanhGia[] @relation("CayTieuChi")
+
+  ketQuaTuDanhGia KetQuaTuDanhGia[]
+  diemCham        DiemChamTieuChi[]
+
+  @@index([kyId, boPhanId])
+}
+
+// Ví dụ 4 mức: hoàn thành xuất sắc, tốt, hoàn thành, không hoàn thành. Ngưỡng do ADMIN cấu hình.
+model QuyTacXepLoai {
+  id        String   @id @default(uuid())
+  boPhanId  String
+  grade     String
+  nhan      String
+  diemTu    Float
+  diemDen   Float
+  moTa      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  boPhan BoPhan @relation(fields: [boPhanId], references: [id], onDelete: Cascade)
+
+  @@unique([boPhanId, grade])
+}
+
+// Mỗi người một phiếu cho mỗi bộ phận họ thuộc (kiêm nhiệm 2 bộ phận có 2 phiếu).
+model PhieuDanhGia {
+  id             String         @id @default(uuid())
+  kyId           String
+  nguoiDungId    String
+  boPhanId       String
+  trangThai      TrangThaiPhieu @default(NHAP)
+  diemKpi        Float          @default(0)
+  diemTieuChi    Float          @default(0)
+  diemTong       Float          @default(0)
+  xepLoai        String?
+  tuNhanXet      String?
+  nguoiXacNhanId String?
+  xacNhanLuc     DateTime?
+  nhanXetXacNhan String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+
+  ky           KyDanhGia  @relation(fields: [kyId], references: [id], onDelete: Cascade)
+  nguoiDung    NguoiDung  @relation("PhieuNguoiDuocDanhGia", fields: [nguoiDungId], references: [id], onDelete: Restrict)
+  boPhan       BoPhan     @relation(fields: [boPhanId], references: [id], onDelete: Restrict)
+  nguoiXacNhan NguoiDung? @relation("PhieuNguoiXacNhan", fields: [nguoiXacNhanId], references: [id], onDelete: SetNull)
+
+  ketQuaTuDanhGia KetQuaTuDanhGia[]
+  nguoiCham       NguoiChamPhieu[]
+
+  @@unique([kyId, nguoiDungId, boPhanId])
+  @@index([nguoiDungId])
+  @@index([boPhanId, trangThai])
+}
+
+model KetQuaTuDanhGia {
+  phieuId    String
+  tieuChiId  String
+  diemTuCham Float    @default(0)
+  damBao     Boolean? // dùng cho tiêu chí kiểu NHI_PHAN
+  nhanXet    String?
+
+  phieu   PhieuDanhGia   @relation(fields: [phieuId], references: [id], onDelete: Cascade)
+  tieuChi TieuChiDanhGia @relation(fields: [tieuChiId], references: [id], onDelete: Cascade)
+
+  @@id([phieuId, tieuChiId])
+}
+
+// Lưu lại người chấm đã được suy ra từ cây tổ chức và cấp bậc.
+// Một người có thể vừa CHAM vừa XAC_NHAN trên cùng một phiếu (hai dòng khác loai).
+model NguoiChamPhieu {
+  id          String        @id @default(uuid())
+  phieuId     String
+  nguoiChamId String
+  loai        LoaiNguoiCham
+  nhanXet     String?
+  chamLuc     DateTime?
+  createdAt   DateTime      @default(now())
+
+  phieu     PhieuDanhGia @relation(fields: [phieuId], references: [id], onDelete: Cascade)
+  nguoiCham NguoiDung    @relation(fields: [nguoiChamId], references: [id], onDelete: Restrict)
+
+  diem DiemChamTieuChi[]
+
+  @@unique([phieuId, nguoiChamId, loai])
+  @@index([nguoiChamId])
+}
+
+model DiemChamTieuChi {
+  nguoiChamPhieuId String
+  tieuChiId        String
+  diem             Float   @default(0)
+  nhanXet          String?
+
+  nguoiChamPhieu NguoiChamPhieu @relation(fields: [nguoiChamPhieuId], references: [id], onDelete: Cascade)
+  tieuChi        TieuChiDanhGia @relation(fields: [tieuChiId], references: [id], onDelete: Cascade)
+
+  @@id([nguoiChamPhieuId, tieuChiId])
+}
+
+// ─── NHÓM H: THÔNG BÁO VÀ IMPORT EXCEL (2 bảng) ───────────────────────────────
+
+// Thông báo trong ứng dụng; email gửi kèm theo sự kiện. loai dạng chuỗi vì danh sách sự kiện
+// (D4) chưa chốt.
+model ThongBao {
   id          String   @id @default(uuid())
-  name        String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  nguoiNhanId String
+  loai        String
+  tieuDe      String
+  noiDung     String?
+  duongDan    String?
+  daDoc       Boolean  @default(false)
+  daGuiEmail  Boolean  @default(false)
+  taoLuc      DateTime @default(now())
 
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  nguoiNhan NguoiDung @relation(fields: [nguoiNhanId], references: [id], onDelete: Cascade)
 
-  projectId String?  @unique
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  steps       WorkflowStep[]
-  transitions WorkflowTransition[]
+  @@index([nguoiNhanId, daDoc, taoLuc])
 }
 
-// RULE O SERVICE: Khong duoc phep xoa Step neu dang co Task su dung step do
-model WorkflowStep {
-  id    String @id @default(uuid())
-  name  String //name: TODO, IN_PROGRESS, REVIEW, DONE,...
-  label String //label: chua lam, dang lam...
+// Giữ dữ liệu giữa bước xem trước và bước duyệt. File có bất kỳ lỗi nào thì trangThai = LOI
+// và không được duyệt.
+model PhienNhapExcel {
+  id             String             @id @default(uuid())
+  loai           LoaiNhapExcel
+  nguoiTaoId     String
+  tenFile        String
+  trangThai      TrangThaiPhienNhap @default(XEM_TRUOC)
+  duLieuXemTruoc Json?
+  loi            Json?
+  tomTat         Json?
+  taoLuc         DateTime           @default(now())
+  hetHanLuc      DateTime
+  duyetLuc       DateTime?
 
-  isInitial Boolean @default(false) // Day co phai la trang thai bat dau ko
-  isFinal   Boolean @default(false) // Day co phai la trang thai ket thuc khong
+  nguoiTao NguoiDung @relation(fields: [nguoiTaoId], references: [id], onDelete: Cascade)
 
-  color String? //mau sac hien thi cua UI, reing biet de the hien
-  order Int     @default(0) //thu tu hien thi
-
-  workflowId String
-  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-
-  fromTransitions WorkflowTransition[] @relation("FromStep")
-  toTransitions   WorkflowTransition[] @relation("ToStep")
-}
-
-//Rule chuyen trang thai
-model WorkflowTransition {
-  id    String  @id @default(uuid())
-  //nhan~ hien thi tren nut
-  label String? //ex: submit for review, reject, resubmit...
-
-  workflowId String?
-  workflow   Workflow? @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-
-  fromStepId String // dang o dau
-  fromStep   WorkflowStep @relation("FromStep", fields: [fromStepId], references: [id], onDelete: Cascade)
-
-  toStepId String // buoc tiep theo
-  toStep   WorkflowStep @relation("ToStep", fields: [toStepId], references: [id], onDelete: Cascade)
-
-  @@unique([workflowId, fromStepId, toStepId])
+  @@index([nguoiTaoId, trangThai])
 }
