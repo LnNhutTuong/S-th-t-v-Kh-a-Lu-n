@@ -28,10 +28,10 @@ export const useAuth = () => {
     mutationFn: (email: string) => authService.sendCode(email), // func thuc thi
     onSuccess:() => {
       toast.success("Mã xác thực đã được gửi đến hộp thư của bạn.");
-    },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi send")
     }
+    // onError: (error) => {
+    //   toast.error(error.response?.data?.message || "Có lỗi xảy ra khi send")
+    // }
   })
 
   //Verify otp -> post -> mutation
@@ -42,9 +42,9 @@ export const useAuth = () => {
       toast.success("Xác thực thành công!");
       router.replace("/home-page");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi verify")
-    }
+    // onError: (error: any) => {
+    //   toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi verify")
+    // }
   })
 
   //Logout -> post -> mutation
@@ -55,7 +55,7 @@ export const useAuth = () => {
       toast.success("Đăng xuất thành công");
       router.replace("/auth/login");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       queryClient.clear();
       router.replace("/auth/login");
     }

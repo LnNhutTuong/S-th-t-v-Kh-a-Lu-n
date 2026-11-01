@@ -1,4 +1,4 @@
-name: TaskMenT CI
+name: CI
 
 on:
   pull_request:
@@ -132,7 +132,9 @@ jobs:
           cache-dependency-path: tm-frontend/package-lock.json
       - name: Install dependencies
         run: npm ci
+
       - name: Run lint
         run: npm run lint
+
       - name: Run build
         run: npm run build

@@ -11,7 +11,7 @@ const protectedPrefixes = ["/home-page"];
 // 2. Định nghĩa các route đăng nhập/đăng ký
 const authPrefixes = ["/auth/login"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Lấy token từ cookie
