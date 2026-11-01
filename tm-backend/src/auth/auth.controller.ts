@@ -1,15 +1,16 @@
-import { Controller, Post, Body, Get, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
-import {  PasswordlessLoginDTO } from './dto/login.dto.js';
-import type { Request } from 'express';
+import { PasswordlessLoginDTO } from './dto/login.dto.js';
 import { Public } from '../permission/decorations/public.decorator.js';
+import { InternalKeyGuard } from './guards/internal-key.guard.js';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('passwordless-login')
   @Public()
+  @UseGuards(InternalKeyGuard)
+  @Post('passwordless-login')
   async passwordlessLogin(@Body() dto: PasswordlessLoginDTO) {
     const user = await this.authService.loginByEmail(dto);
     return {
@@ -18,9 +19,6 @@ export class AuthController {
     };
   }
 
-  @Get('me')
-  async me(@Req() req: Request) {
-    return req.user;
-  }
 
+  
 }

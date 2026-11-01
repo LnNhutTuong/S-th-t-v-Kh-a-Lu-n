@@ -1,13 +1,13 @@
 export type JwtPayload = {
   sub: string;
   email: string;
-  name: string | null;
+  ten: string | null;
 };
 
 export type AuthUser = {
   id: string;
   email: string;
-  name: string | null;
+  ten: string | null;
 };
 
 
@@ -15,12 +15,13 @@ export type LoginResponse = {
   accessToken: string;
   user: {
     email: string;
-    name: string | null;
-    roles: {
-      system: string[],
-      workspace: {
-        workspaceName: string,
-        role: string
+    ten: string | null;
+    vaiTro: {
+      heThong: string[],
+      boPhan: {
+        idBoPhan: string,
+        tenBoPhan: string,
+        vaiTro: string
       }[]
     }
   };

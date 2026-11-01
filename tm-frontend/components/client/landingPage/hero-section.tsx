@@ -21,15 +21,21 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { MOCK_TASKS } from "@/constants/landing-data";
+import { useRouter } from "next/navigation";
 
 export default function HeroSection() {
   const [isTasksLoading, setIsTasksLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     // Giả lập thời gian tải dữ liệu cho Product Preview
     const timer = setTimeout(() => setIsTasksLoading(false), 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleLogin = () => {
+    router.push('/auth/login');
+  }
 
   return (
     <section
@@ -68,7 +74,7 @@ export default function HeroSection() {
               <Button
                 size="lg"
                 className="gap-2 w-full sm:w-auto shadow-md"
-                onClick={() => alert("Chuyển hướng đến Đăng nhập")}
+                onClick={() => handleLogin()}
               >
                 Đăng nhập hệ thống <ArrowRight size={18} />
               </Button>

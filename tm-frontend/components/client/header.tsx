@@ -21,7 +21,7 @@ export default function Header() {
   }, []);
 
   const handleLoginClick = () => {
-    router.push("auth/login");
+    router.push("/auth/login");
   };
 
   return (

@@ -1,283 +1,283 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { SubmitEvidenceDto } from './dto/submit-evidence.dto.js';
-import { ReviewEvidenceDto } from './dto/review-evidence.dto.js';
-import { AuthUser } from '../auth/types/jwt-payload.type.js';
-import { PrismaService } from '../prisma/prisma.service.js';
-import { TaskOutputService } from '../task-output/task-output.service.js';
-import { ProjectService } from '../project/project.service.js';
-import { TaskService } from '../task/task.service.js';
-import { PermissionService } from '../permission/permission.service.js';
-import { PERMISSION_KEYS } from '../permission/constants/pemission.constants.js';
+// import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+// import { SubmitEvidenceDto } from './dto/submit-evidence.dto.js';
+// import { ReviewEvidenceDto } from './dto/review-evidence.dto.js';
+// import { AuthUser } from '../auth/types/jwt-payload.type.js';
+// import { PrismaService } from '../prisma/prisma.service.js';
+// import { TaskOutputService } from '../task-output/task-output.service.js';
+// import { ProjectService } from '../project/project.service.js';
+// import { TaskService } from '../task/task.service.js';
+// import { PermissionService } from '../permission/permission.service.js';
+// import { PERMISSION_KEYS } from '../permission/constants/quyen-han.constants.js';
 
-@Injectable()
-export class EvidenceService {
+// @Injectable()
+// export class EvidenceService {
 
-    constructor(
-        private readonly prisma: PrismaService,
-        private readonly taskOutputService: TaskOutputService,
-        private readonly projectService: ProjectService,
-        private readonly taskService: TaskService,
-        private readonly permissionService: PermissionService
-    ){}
+//     constructor(
+//         private readonly prisma: PrismaService,
+//         private readonly taskOutputService: TaskOutputService,
+//         private readonly projectService: ProjectService,
+//         private readonly taskService: TaskService,
+//         private readonly permissionService: PermissionService
+//     ){}
 
-    async submit(dto: SubmitEvidenceDto, user: AuthUser){
-        //tim taskoutput
-        const taskOutput = await this.taskOutputService.findOne(dto.taskOutputId, user);
+//     async submit(dto: SubmitEvidenceDto, user: AuthUser){
+//         //tim taskoutput
+//         const taskOutput = await this.taskOutputService.findOne(dto.taskOutputId, user);
         
-        //tim task va check can view
-        const task = await this.taskService.findOne(taskOutput.taskId, user);
+//         //tim task va check can view
+//         const task = await this.taskService.findOne(taskOutput.taskId, user);
 
-        //check membership 
-        const memberShip = task.taskAssignees.some(assignee => assignee.userId === user.id);
+//         //check membership 
+//         const memberShip = task.taskAssignees.some(assignee => assignee.userId === user.id);
 
-        if(!memberShip){
-            throw new ForbiddenException('You dont have permission to submit evidence');
-        }
+//         if(!memberShip){
+//             throw new ForbiddenException('You dont have permission to submit evidence');
+//         }
 
-        // //check project member
-        // if(task.project){
-        //     await this.projectService.assertProjectMember(task.project.id, user.id);
-        // }
+//         // //check project member
+//         // if(task.project){
+//         //     await this.projectService.assertProjectMember(task.project.id, user.id);
+//         // }
         
-        // await this.taskService.assertTaskPermission(task.id, user.id);
+//         // await this.taskService.assertTaskPermission(task.id, user.id);
 
-        // //check permission
-        // await this.permissionService.assertPermission(task.workspaceId, user.id, PERMISSION_KEYS.EVIDENCE_SUBMIT, task.project?.id)
+//         // //check permission
+//         // await this.permissionService.assertPermission(task.workspaceId, user.id, PERMISSION_KEYS.EVIDENCE_SUBMIT, task.project?.id)
 
-        const submitted = await this.prisma.evidence.create({
-            data:{
-                taskOutputId: taskOutput.id,
-                fileUrl: dto.fileUrl,
-                fileName: dto.fileName,
-                mimeType: dto.mimeType,
-                uploadedById: user.id,
-                uploadedAt: new Date()
-            }
-        })
+//         const submitted = await this.prisma.evidence.create({
+//             data:{
+//                 taskOutputId: taskOutput.id,
+//                 fileUrl: dto.fileUrl,
+//                 fileName: dto.fileName,
+//                 mimeType: dto.mimeType,
+//                 uploadedById: user.id,
+//                 uploadedAt: new Date()
+//             }
+//         })
 
-        return this.prisma.evidence.findUnique({
-            where:{
-                id: submitted.id
-            },
-            omit:{
-                taskOutputId: true, uploadedById: true, reviewedById: true
-            },include:{
-                taskOutput:{
-                    select:{
-                        id: true,
-                        title: true    
-                    }
-                },uploadedBy:{
-                    select:{
-                        id:true,
-                        name: true
-                    }
-                },
-                reviewedBy:{
-                    select:{
-                        id: true,
-                        name: true
-                    }
-                }
-            }
-        })
-    }
+//         return this.prisma.evidence.findUnique({
+//             where:{
+//                 id: submitted.id
+//             },
+//             omit:{
+//                 taskOutputId: true, uploadedById: true, reviewedById: true
+//             },include:{
+//                 taskOutput:{
+//                     select:{
+//                         id: true,
+//                         title: true    
+//                     }
+//                 },uploadedBy:{
+//                     select:{
+//                         id:true,
+//                         name: true
+//                     }
+//                 },
+//                 reviewedBy:{
+//                     select:{
+//                         id: true,
+//                         name: true
+//                     }
+//                 }
+//             }
+//         })
+//     }
 
-    async review(id: string, dto: ReviewEvidenceDto, user: AuthUser){
-        const evidence = await this.prisma.evidence.findUnique({
-            where:{
-                id  
-            },
-            include:{
-                uploadedBy:{
-                    select:{
-                        id: true,
-                        name: true
-                    }
-                },
-                taskOutput:{
-                    select:{
-                        task:{
-                            select:{
-                                workspaceId: true,
-                                projectId: true
-                            }
-                        }
-                    }
-                }
-            }
-        })
+//     async review(id: string, dto: ReviewEvidenceDto, user: AuthUser){
+//         const evidence = await this.prisma.evidence.findUnique({
+//             where:{
+//                 id  
+//             },
+//             include:{
+//                 uploadedBy:{
+//                     select:{
+//                         id: true,
+//                         name: true
+//                     }
+//                 },
+//                 taskOutput:{
+//                     select:{
+//                         task:{
+//                             select:{
+//                                 workspaceId: true,
+//                                 projectId: true
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         })
 
-        if(!evidence){
-            throw new NotFoundException('Evidence not found');
-        }   
+//         if(!evidence){
+//             throw new NotFoundException('Evidence not found');
+//         }   
         
-        if(user.id === evidence.uploadedById){
-            throw new ForbiddenException('You cannot review your own evidence')
-        }
+//         if(user.id === evidence.uploadedById){
+//             throw new ForbiddenException('You cannot review your own evidence')
+//         }
 
-        const rankReviewer = await this.permissionService.getRanks([user.id], evidence.taskOutput.task.workspaceId, evidence.taskOutput.task.projectId)
-        console.log(">>>check rank reviewer: ", rankReviewer);
-        const rankUploader = await this.permissionService.getRanks([evidence.uploadedBy.id], evidence.taskOutput.task.workspaceId, evidence.taskOutput.task.projectId)
-        console.log(">>>check rank uploader: ", rankUploader);
+//         const rankReviewer = await this.permissionService.getRanks([user.id], evidence.taskOutput.task.workspaceId, evidence.taskOutput.task.projectId)
+//         console.log(">>>check rank reviewer: ", rankReviewer);
+//         const rankUploader = await this.permissionService.getRanks([evidence.uploadedBy.id], evidence.taskOutput.task.workspaceId, evidence.taskOutput.task.projectId)
+//         console.log(">>>check rank uploader: ", rankUploader);
 
-        if(rankReviewer <= rankUploader){
-            throw new ForbiddenException('You dont have permission to review this evidence')
-        }
+//         if(rankReviewer <= rankUploader){
+//             throw new ForbiddenException('You dont have permission to review this evidence')
+//         }
 
-        const task = evidence.taskOutput.task;
+//         const task = evidence.taskOutput.task;
 
-        const isSuperAdmin = await this.permissionService.isSuperAdmin(user.id);
+//         const isSuperAdmin = await this.permissionService.isSuperAdmin(user.id);
 
-        const hasReviewPerm = await this.permissionService.hasPermission(
-            task.workspaceId,
-            user.id,
-            PERMISSION_KEYS.EVIDENCE_REVIEW,
-            task.projectId ?? undefined,
-        );
+//         const hasReviewPerm = await this.permissionService.hasPermission(
+//             task.workspaceId,
+//             user.id,
+//             PERMISSION_KEYS.EVIDENCE_REVIEW,
+//             task.projectId ?? undefined,
+//         );
 
-        if (!isSuperAdmin && !hasReviewPerm) {
-            throw new ForbiddenException('You dont have permission to review this evidence');
-        }
+//         if (!isSuperAdmin && !hasReviewPerm) {
+//             throw new ForbiddenException('You dont have permission to review this evidence');
+//         }
 
-        const evidenceAfterUpdate = await this.prisma.evidence.update({
-            where:{
-                id: evidence.id
-            },
-            data:{
-                status: dto.status,
-                reviewedById: user.id,
-                reviewNote: dto.reviewNote,
-                reviewedAt: new Date()
-            }
-        })
+//         const evidenceAfterUpdate = await this.prisma.evidence.update({
+//             where:{
+//                 id: evidence.id
+//             },
+//             data:{
+//                 status: dto.status,
+//                 reviewedById: user.id,
+//                 reviewNote: dto.reviewNote,
+//                 reviewedAt: new Date()
+//             }
+//         })
 
 
-        return this.prisma.evidence.findUnique({
-            where:{
-                id: evidenceAfterUpdate.id
-            },
-            omit:{
-                taskOutputId: true, uploadedById: true, reviewedById: true
-            },
-            include:{
-                uploadedBy:{
-                    select:{
-                        id: true,
-                        name: true
-                    }
-                },
-                reviewedBy:{
-                    select:{
-                        id: true,
-                        name: true,
-                    }
-                },
-                taskOutput:{
-                    select:{
-                        id: true,
-                        title: true,
-                        task:{
-                            select:{
-                                id: true,
-                                title: true
-                            }
-                        }
-                    },
-                }
+//         return this.prisma.evidence.findUnique({
+//             where:{
+//                 id: evidenceAfterUpdate.id
+//             },
+//             omit:{
+//                 taskOutputId: true, uploadedById: true, reviewedById: true
+//             },
+//             include:{
+//                 uploadedBy:{
+//                     select:{
+//                         id: true,
+//                         name: true
+//                     }
+//                 },
+//                 reviewedBy:{
+//                     select:{
+//                         id: true,
+//                         name: true,
+//                     }
+//                 },
+//                 taskOutput:{
+//                     select:{
+//                         id: true,
+//                         title: true,
+//                         task:{
+//                             select:{
+//                                 id: true,
+//                                 title: true
+//                             }
+//                         }
+//                     },
+//                 }
                 
-            }
-        })
-    }
+//             }
+//         })
+//     }
 
-    async findByTaskOutput(taskOutputId: string, user: AuthUser){
+//     async findByTaskOutput(taskOutputId: string, user: AuthUser){
 
-        const taskOutput = await this.taskOutputService.findOne(taskOutputId, user);
+//         const taskOutput = await this.taskOutputService.findOne(taskOutputId, user);
 
-        const evidence = await this.prisma.evidence.findMany({
-            where:{
-                taskOutputId: taskOutput.id
-            },
-            omit:{
-                taskOutputId: true, uploadedById: true, reviewedById: true
-            },
-            include:{
-                 taskOutput:{
-                    select:{
-                        id: true,
-                        title: true,
-                        task:{
-                            select:{
-                                id: true,
-                                title: true
-                            }
-                        }
-                    },
-                },
-                uploadedBy:{
-                    select:{
-                        id: true,
-                        name: true
-                    }
-                },
-                reviewedBy:{
-                    select:{
-                        id: true,
-                        name: true,
-                    }
-                },
-            }
-        })
+//         const evidence = await this.prisma.evidence.findMany({
+//             where:{
+//                 taskOutputId: taskOutput.id
+//             },
+//             omit:{
+//                 taskOutputId: true, uploadedById: true, reviewedById: true
+//             },
+//             include:{
+//                  taskOutput:{
+//                     select:{
+//                         id: true,
+//                         title: true,
+//                         task:{
+//                             select:{
+//                                 id: true,
+//                                 title: true
+//                             }
+//                         }
+//                     },
+//                 },
+//                 uploadedBy:{
+//                     select:{
+//                         id: true,
+//                         name: true
+//                     }
+//                 },
+//                 reviewedBy:{
+//                     select:{
+//                         id: true,
+//                         name: true,
+//                     }
+//                 },
+//             }
+//         })
         
-        if(!evidence.length) return []
+//         if(!evidence.length) return []
 
-        return evidence;
-    }
+//         return evidence;
+//     }
 
-    async remove(id: string, user:AuthUser){
-        const evidence = await this.prisma.evidence.findUnique({
-            where:{
-                id,
-            },
-            include:{
-                taskOutput:{
-                    select:{
-                        task:{
-                            select:{
-                                workspaceId: true,
-                                projectId: true,
-                            }
-                        }
-                    }
-                }
-            }
-        })
+//     async remove(id: string, user:AuthUser){
+//         const evidence = await this.prisma.evidence.findUnique({
+//             where:{
+//                 id,
+//             },
+//             include:{
+//                 taskOutput:{
+//                     select:{
+//                         task:{
+//                             select:{
+//                                 workspaceId: true,
+//                                 projectId: true,
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         })
 
-        if(!evidence){
-            throw new NotFoundException('Evidence not found');
-        }
+//         if(!evidence){
+//             throw new NotFoundException('Evidence not found');
+//         }
 
-        if(evidence.status !== "PENDING"){
-            throw new BadRequestException('This evidence has been reviewed');
-        }
+//         if(evidence.status !== "PENDING"){
+//             throw new BadRequestException('This evidence has been reviewed');
+//         }
 
-        const isOwner = evidence.uploadedById === user.id;
-        const isSuperAdmin = await this.permissionService.isSuperAdmin(user.id);
-        const hasDeletePerm = await this.permissionService.hasPermission(
-            evidence.taskOutput.task.workspaceId,
-            user.id,
-            PERMISSION_KEYS.EVIDENCE_DELETE,
-            evidence.taskOutput.task.projectId ?? undefined,
-        );
+//         const isOwner = evidence.uploadedById === user.id;
+//         const isSuperAdmin = await this.permissionService.isSuperAdmin(user.id);
+//         const hasDeletePerm = await this.permissionService.hasPermission(
+//             evidence.taskOutput.task.workspaceId,
+//             user.id,
+//             PERMISSION_KEYS.EVIDENCE_DELETE,
+//             evidence.taskOutput.task.projectId ?? undefined,
+//         );
 
-        if (!isOwner && !isSuperAdmin && !hasDeletePerm) {
-            throw new ForbiddenException('You dont have permission to delete this evidence');
-        }
+//         if (!isOwner && !isSuperAdmin && !hasDeletePerm) {
+//             throw new ForbiddenException('You dont have permission to delete this evidence');
+//         }
 
-        await this.prisma.evidence.delete({
-            where:{
-                id
-            }
-        })
-    }
-}
+//         await this.prisma.evidence.delete({
+//             where:{
+//                 id
+//             }
+//         })
+//     }
+// }

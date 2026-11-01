@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
-import { CleanupService } from './cleanup.service.js';
-import { PrismaModule } from '../../prisma/prisma.module.js';
+// import { Module } from '@nestjs/common';
+// import { CleanupService } from './cleanup.service.js';
+// import { PrismaModule } from '../../prisma/prisma.module.js';
 
-@Module({
-  imports: [
-    PrismaModule,
-  ],
-  providers: [
-    CleanupService,
-  ],
-})
-export class CleanupModule { }
+// @Module({
+//   imports: [
+//     PrismaModule,
+//   ],
+//   providers: [
+//     CleanupService,
+//   ],
+// })
+// export class CleanupModule { }
