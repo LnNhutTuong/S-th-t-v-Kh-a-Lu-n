@@ -18,4 +18,10 @@ export class AppController {
     return { status: 'ok' };
   }
 
+  @Public()
+  @Get("/ready")
+  ready() {
+    return this.appService.getReady();
+  }
+
 }
