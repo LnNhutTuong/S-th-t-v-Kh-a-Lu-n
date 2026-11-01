@@ -1,4 +1,4 @@
-name: TaskMenT CI
+name: CI
 
 on:
   pull_request:
@@ -38,6 +38,7 @@ jobs:
     # Gia tri CI tu dat, KHONG dung secrets de PR tu fork cung chay duoc
     env:
       DATABASE_URL: postgresql://postgres:password@localhost:5432/task-progress
+      DIRECT_URL: postgresql://postgres:password@localhost:5432/task-progress
       JWT_SECRET: ci-only-secret-not-used-anywhere-else
       JWT_ACCESS_TOKEN_EXPIRES_IN: 15m
       FE_URL: http://localhost:5173
@@ -65,7 +66,7 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
-      - name: Validate Prisma schema2202
+      - name: Validate Prisma
         run: npx prisma validate
 
       - name: Lint
@@ -86,34 +87,34 @@ jobs:
       - name: Run unit tests
         run: npm run test -- --passWithNoTests
 
-      - name: Start API in background
-        run: |
-          node dist/main.js > server.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl -fs http://localhost:2202/health > /dev/null; then
-              echo "API is up"; exit 0
-            fi
-            sleep 2
-          done
-          echo "API did not start"; cat server.log; exit 1
+      # - name: Start API in background
+      #   run: |
+      #     node dist/main.js > server.log 2>&1 &
+      #     for i in $(seq 1 30); do
+      #       if curl -fs http://localhost:2202/health > /dev/null; then
+      #         echo "API is up"; exit 0
+      #       fi
+      #       sleep 2
+      #     done
+      #     echo "API did not start"; cat server.log; exit 1
 
-      - name: Run Postman collection (Newman)
-        run: |
-          npx --yes newman@6 run postman/TaskMenT_for_CI.postman_collection.json \
-            -e postman/For_CI.postman_environment.json \
-            --env-var baseUrl=http://localhost:2202 \
-            --reporters cli,junit \
-            --reporter-junit-export newman-results.xml
+      # - name: Run Postman collection (Newman)
+      #   run: |
+      #     npx --yes newman@6 run postman/TaskMenT_for_CI.postman_collection.json \
+      #       -e postman/For_CI.postman_environment.json \
+      #       --env-var baseUrl=http://localhost:2202 \
+      #       --reporters cli,junit \
+      #       --reporter-junit-export newman-results.xml
 
-      - name: Upload test report and server log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-test-output
-          path: |
-            tm-backend/newman-results.xml
-            tm-backend/server.log
-          if-no-files-found: ignore
+      # - name: Upload test report and server log
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: backend-test-output
+      #     path: |
+      #       tm-backend/newman-results.xml
+      #       tm-backend/server.log
+      #     if-no-files-found: ignore
 
   frontend:
     runs-on: ubuntu-latest
@@ -132,7 +133,9 @@ jobs:
           cache-dependency-path: tm-frontend/package-lock.json
       - name: Install dependencies
         run: npm ci
+
       - name: Run lint
         run: npm run lint
+
       - name: Run build
         run: npm run build

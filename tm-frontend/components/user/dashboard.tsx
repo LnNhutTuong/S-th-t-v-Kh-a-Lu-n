@@ -6,7 +6,7 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-bold">Xin chào, {user?.name || user?.email}!</h1>
+      <h1 className="text-xl font-bold">Xin chào, {user?.email}!</h1>
       <button
         onClick={() => logout()}
         disabled={isLoggingOut}
