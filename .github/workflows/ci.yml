@@ -38,6 +38,7 @@ jobs:
     # Gia tri CI tu dat, KHONG dung secrets de PR tu fork cung chay duoc
     env:
       DATABASE_URL: postgresql://postgres:password@localhost:5432/task-progress
+      DIRECT_URL: postgresql://postgres:password@localhost:5432/task-progress
       JWT_SECRET: ci-only-secret-not-used-anywhere-else
       JWT_ACCESS_TOKEN_EXPIRES_IN: 15m
       FE_URL: http://localhost:5173
@@ -65,7 +66,7 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
-      - name: Validate Prisma schema2202
+      - name: Validate Prisma
         run: npx prisma validate
 
       - name: Lint
