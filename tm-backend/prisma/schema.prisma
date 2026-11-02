@@ -186,6 +186,7 @@ model NguoiDung {
 // Mọi ô trong cây tổ chức (Ban Giám hiệu, Khoa, Bộ môn, Phòng, Viện, Trung tâm...).
 // nhom: nhãn Đào tạo / Chức năng / Sự nghiệp, null cho Ban Giám hiệu.
 // Bộ môn của một Khoa có boPhanChaId là Khoa đó; bộ môn độc lập có cha là Ban Giám hiệu.
+// ví dụ: Trường có thể là Cha của nhiều Phòng, Ban Giám hiệu có thể là Cha của nhiều Khoa. 
 model BoPhan {
   id            String     @id @default(uuid())
   ma            String     @unique

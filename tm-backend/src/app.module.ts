@@ -25,6 +25,8 @@ import { APP_GUARD } from '@nestjs/core';
 // import { ClassificationRuleModule } from './classification-rule/classification-rule.module.js';
 // import { EvaluationPeriodModule } from './evaluation-period/evaluation-period.module.js';
 // import { EvaluationModule } from './evaluation/evaluation.module.js';
+import { BoPhanModule } from './bo-phan/bo-phan.module.js';
+import { ThanhVienBoPhanModule } from './thanh-vien-bo-phan/thanh-vien-bo-phan.module.js';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { APP_GUARD } from '@nestjs/core';
       isGlobal: true,
     }),
     AuthModule,
+    BoPhanModule,
+    ThanhVienBoPhanModule,
     // ObjectiveModule,
     // KeyResultModule,
     // WorkflowModule,

@@ -8,6 +8,17 @@ import { CapBac, LoaiBoPhan } from '../../generated/prisma/enums.js';
 
 const d = <T extends string>(ma: T, moTa: string) => ({ ma, moTa }) as const;
 
+export const CHA_HOP_LE: Record<LoaiBoPhan, LoaiBoPhan[]> = {
+  [LoaiBoPhan.BAN_GIAM_HIEU]: [],
+  [LoaiBoPhan.KHOA]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.PHONG]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.VIEN]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.TRUNG_TAM]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.THU_VIEN]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.TRUONG]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.BO_MON]: [LoaiBoPhan.KHOA, LoaiBoPhan.BAN_GIAM_HIEU],
+};
+
 export const DINH_NGHIA_QUYEN = {
   // ─── Người dùng, bộ phận, thành viên ─────────────
   NGUOI_DUNG_XEM: d('nguoi_dung.xem', 'Xem danh sách người dùng'),
