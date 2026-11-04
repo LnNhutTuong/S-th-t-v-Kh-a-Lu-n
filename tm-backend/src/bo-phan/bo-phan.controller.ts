@@ -5,6 +5,8 @@ import { UpdateBoPhanDto } from './dto/update-bo-phan.dto.js';
 import { UpdateStatusBoPhanDto } from './dto/update-status-bo-phan.dto.js';
 import { ThemThanhVienBoPhanDto } from '../thanh-vien-bo-phan/dto/them-thanh-vien-bo-phan.dto.js';
 import { ThanhVienBoPhanService } from '../thanh-vien-bo-phan/thanh-vien-bo-phan.service.js';
+import { UpdateNgayKetThucDto } from '../thanh-vien-bo-phan/dto/update-ket-thuc.dto.js';
+import { SuaThanhVienBoPhanDto } from '../thanh-vien-bo-phan/dto/sua-thanh-vien-bo-phan.dto.js';
 
 @Controller('bo-phan')
 export class BoPhanController {
@@ -38,6 +40,21 @@ export class BoPhanController {
   @Post('/:boPhanId/thanh-vien')
   addThanhVien(@Param('boPhanId') boPhanId: string, @Body() dto: ThemThanhVienBoPhanDto) {
     return this.thanhVienBoPhanService.add(boPhanId, dto)
+  }
+
+  @Get('/:boPhanId/thanh-vien')
+  findAllThanhVien(@Param('boPhanId') boPhanId: string, @Query('baoGomDaKetThuc') b?: string) {
+    return this.thanhVienBoPhanService.findAll(boPhanId, b === 'true');
+  }
+
+  @Patch('/:boPhanId/thanh-vien/:nguoiDungId/ket-thuc')
+  updateNgayKetThuc(@Param('boPhanId') boPhanId: string, @Param('nguoiDungId') nguoiDungId: string,@Body() dto: UpdateNgayKetThucDto){
+    return this.thanhVienBoPhanService.updateNgayKetThuc(boPhanId, nguoiDungId, dto);
+  }
+
+  @Patch('/:boPhanId/thanh-vien/:nguoiDungId')
+  updateThanhVien(@Param('boPhanId') boPhanId: string, @Param('nguoiDungId') nguoiDungId: string, @Body() dto: SuaThanhVienBoPhanDto){
+    return this.thanhVienBoPhanService.updateThanhVien(boPhanId, nguoiDungId, dto)
   }
 
 }
