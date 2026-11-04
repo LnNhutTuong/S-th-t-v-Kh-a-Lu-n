@@ -3,7 +3,7 @@ import { CreateBoPhanDto } from './dto/create-bo-phan.dto.js';
 import { UpdateBoPhanDto } from './dto/update-bo-phan.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CHA_HOP_LE } from '../permission/constants/quyen-han.constants.js';
-import { LoaiBoPhan, NhomDonVi } from '../generated/prisma/enums.js';
+import { CapBac, LoaiBoPhan, NhomDonVi } from '../generated/prisma/enums.js';
 import { BoPhan, Prisma } from '../generated/prisma/client.js';
 import { UpdateStatusBoPhanDto } from './dto/update-status-bo-phan.dto.js';
 
@@ -203,6 +203,36 @@ export class BoPhanService {
     }
     
     return this.prisma.boPhan.update({ where: { id }, data: { ngungHoatDong: dto.ngungHoatDong } });
+  }
+
+  async getBoPhanThieuLanhDao(){
+    const dsBoPhan = await this.prisma.boPhan.findMany({
+      where:{
+        ngungHoatDong: false
+      },
+      select:{
+        id: true, 
+        ma: true, 
+        ten: true, 
+        loai: true,  
+        thanhVien:{ 
+          where:{ 
+                ngayKetThuc: null, capBac: { in: [CapBac.TRUONG, CapBac.PHO] },
+                nguoiDung: { deletedAt: null } 
+              }, 
+            select:{ 
+              capBac: true 
+            } 
+          } 
+        }
+    })
+
+    const thongTinCacBoPhan = dsBoPhan.map(bp => ({ id: bp.id, ma: bp.ma, ten: bp.ten, loai: bp.loai, thieuTruong: !bp.thanhVien.some(tv => tv.capBac === CapBac.TRUONG), thieuPho: (!bp.thanhVien.some(tv => tv.capBac === CapBac.PHO))}));
+
+    const danhSachBoPhanThieu = thongTinCacBoPhan.filter(bp => bp.thieuTruong || bp.thieuPho);
+
+    return {tongBoPhanDaKiem: dsBoPhan.length, soBoPhanThieu: danhSachBoPhanThieu.length, danhSachBoPhanThieu};
+
   }
 
 }

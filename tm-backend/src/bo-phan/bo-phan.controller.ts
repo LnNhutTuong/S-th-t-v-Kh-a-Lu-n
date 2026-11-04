@@ -22,6 +22,11 @@ export class BoPhanController {
     return this.boPhanService.findAll(b === 'true'); 
   }
 
+  @Get('thieu-lanh-dao')
+  getBoPhanThieuLanhDao(){
+    return this.boPhanService.getBoPhanThieuLanhDao();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.boPhanService.findOne(id);
@@ -31,7 +36,7 @@ export class BoPhanController {
   update(@Param('id') id: string, @Body() updateBoPhanDto: UpdateBoPhanDto) {
     return this.boPhanService.update(id, updateBoPhanDto);
   }
-
+  
   @Patch(':id/ngung-hoat-dong')
   updateTrangThai(@Param('id') id: string, @Body() UpdateStatusBoPhanDto: UpdateStatusBoPhanDto) {
     return this.boPhanService.updateTrangThai(id, UpdateStatusBoPhanDto)
