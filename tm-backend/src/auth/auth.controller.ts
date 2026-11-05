@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { PasswordlessLoginDTO } from './dto/login.dto.js';
-import { Public } from '../permission/decorations/public.decorator.js';
+import { Public } from '../permission/decorators/public.decorator.js';
 import { InternalKeyGuard } from './guards/internal-key.guard.js';
 
 @Controller('auth')

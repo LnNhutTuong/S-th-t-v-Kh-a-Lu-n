@@ -125,6 +125,7 @@ export const DINH_NGHIA_QUYEN = {
 
 type DinhNghia = typeof DINH_NGHIA_QUYEN;
 
+// IMPORTANTS
 // Dùng trong code: @RequirePermission(QUYEN.NHIEM_VU_TAO) -> 'nhiem_vu.tao'
 export const QUYEN = Object.fromEntries(
   Object.entries(DINH_NGHIA_QUYEN).map(([khoa, v]) => [khoa, v.ma]),
