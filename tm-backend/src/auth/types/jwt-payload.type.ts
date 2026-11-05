@@ -13,7 +13,7 @@ export type AuthUser = {
 
 export type LoginResponse = {
   accessToken: string;
-  user: {
+  nguoiDung: {
     email: string;
     ten: string | null;
     vaiTro: {

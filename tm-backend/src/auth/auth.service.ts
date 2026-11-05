@@ -72,7 +72,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     return {
       accessToken,
-      user: {
+      nguoiDung: {
         email: nguoiDung.email,
         ten: nguoiDung.ten,
         vaiTro: {

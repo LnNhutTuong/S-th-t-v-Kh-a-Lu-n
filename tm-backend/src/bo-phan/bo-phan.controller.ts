@@ -7,6 +7,8 @@ import { ThemThanhVienBoPhanDto } from '../thanh-vien-bo-phan/dto/them-thanh-vie
 import { ThanhVienBoPhanService } from '../thanh-vien-bo-phan/thanh-vien-bo-phan.service.js';
 import { UpdateNgayKetThucDto } from '../thanh-vien-bo-phan/dto/update-ket-thuc.dto.js';
 import { SuaThanhVienBoPhanDto } from '../thanh-vien-bo-phan/dto/sua-thanh-vien-bo-phan.dto.js';
+import { RequirePermission } from '../permission/decorators/permission.decoration.js';
+import { QUYEN } from '../permission/constants/quyen-han.constants.js';
 
 @Controller('bo-phan')
 export class BoPhanController {
@@ -27,18 +29,19 @@ export class BoPhanController {
     return this.boPhanService.getBoPhanThieuLanhDao();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get(':boPhanId')
+  findOne(@Param('boPhanId') id: string) {
     return this.boPhanService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBoPhanDto: UpdateBoPhanDto) {
+  @RequirePermission(QUYEN.BO_PHAN_SUA)
+  @Patch(':boPhanId')
+  update(@Param('boPhanId') id: string, @Body() updateBoPhanDto: UpdateBoPhanDto) {
     return this.boPhanService.update(id, updateBoPhanDto);
   }
   
-  @Patch(':id/ngung-hoat-dong')
-  updateTrangThai(@Param('id') id: string, @Body() UpdateStatusBoPhanDto: UpdateStatusBoPhanDto) {
+  @Patch(':boPhanId/ngung-hoat-dong')
+  updateTrangThai(@Param('boPhanId') id: string, @Body() UpdateStatusBoPhanDto: UpdateStatusBoPhanDto) {
     return this.boPhanService.updateTrangThai(id, UpdateStatusBoPhanDto)
   }
 
