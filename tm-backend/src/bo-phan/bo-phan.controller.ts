@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, UseGuards } from '@nestjs/common';
 import { BoPhanService } from './bo-phan.service.js';
 import { CreateBoPhanDto } from './dto/create-bo-phan.dto.js';
 import { UpdateBoPhanDto } from './dto/update-bo-phan.dto.js';
@@ -9,11 +9,13 @@ import { UpdateNgayKetThucDto } from '../thanh-vien-bo-phan/dto/update-ket-thuc.
 import { SuaThanhVienBoPhanDto } from '../thanh-vien-bo-phan/dto/sua-thanh-vien-bo-phan.dto.js';
 import { RequirePermission } from '../permission/decorators/permission.decoration.js';
 import { QUYEN } from '../permission/constants/quyen-han.constants.js';
+import { AdminGuard } from '../permission/guards/permission-admin.guard.js';
 
 @Controller('bo-phan')
 export class BoPhanController {
   constructor(private readonly boPhanService: BoPhanService, private readonly thanhVienBoPhanService: ThanhVienBoPhanService) {}
 
+  @UseGuards(AdminGuard)
   @Post()
   create(@Body() createBoPhanDto: CreateBoPhanDto) {
     return this.boPhanService.create(createBoPhanDto);
@@ -24,6 +26,7 @@ export class BoPhanController {
     return this.boPhanService.findAll(b === 'true'); 
   }
 
+  @UseGuards(AdminGuard)
   @Get('thieu-lanh-dao')
   getBoPhanThieuLanhDao(){
     return this.boPhanService.getBoPhanThieuLanhDao();
@@ -40,11 +43,13 @@ export class BoPhanController {
     return this.boPhanService.update(id, updateBoPhanDto);
   }
   
+  @RequirePermission(QUYEN.BO_PHAN_NGUNG)
   @Patch(':boPhanId/ngung-hoat-dong')
   updateTrangThai(@Param('boPhanId') id: string, @Body() UpdateStatusBoPhanDto: UpdateStatusBoPhanDto) {
     return this.boPhanService.updateTrangThai(id, UpdateStatusBoPhanDto)
   }
 
+  @RequirePermission(QUYEN.THANH_VIEN_QUAN_LY)
   @Post('/:boPhanId/thanh-vien')
   addThanhVien(@Param('boPhanId') boPhanId: string, @Body() dto: ThemThanhVienBoPhanDto) {
     return this.thanhVienBoPhanService.add(boPhanId, dto)
@@ -55,11 +60,13 @@ export class BoPhanController {
     return this.thanhVienBoPhanService.findAll(boPhanId, b === 'true');
   }
 
+  @RequirePermission(QUYEN.THANH_VIEN_QUAN_LY)
   @Patch('/:boPhanId/thanh-vien/:nguoiDungId/ket-thuc')
   updateNgayKetThuc(@Param('boPhanId') boPhanId: string, @Param('nguoiDungId') nguoiDungId: string,@Body() dto: UpdateNgayKetThucDto){
     return this.thanhVienBoPhanService.updateNgayKetThuc(boPhanId, nguoiDungId, dto);
   }
 
+  @RequirePermission(QUYEN.THANH_VIEN_QUAN_LY)
   @Patch('/:boPhanId/thanh-vien/:nguoiDungId')
   updateThanhVien(@Param('boPhanId') boPhanId: string, @Param('nguoiDungId') nguoiDungId: string, @Body() dto: SuaThanhVienBoPhanDto){
     return this.thanhVienBoPhanService.updateThanhVien(boPhanId, nguoiDungId, dto)
