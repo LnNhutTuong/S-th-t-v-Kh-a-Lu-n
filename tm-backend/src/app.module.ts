@@ -10,6 +10,8 @@ import { PermissionModule } from './permission/permission.module.js';
 import { BoPhanModule } from './bo-phan/bo-phan.module.js';
 import { ThanhVienBoPhanModule } from './thanh-vien-bo-phan/thanh-vien-bo-phan.module.js';
 import { QuyenBoPhanGuard } from './permission/guards/permission-bo-phan.guard.js';
+import { QuyenHanModule } from './quyen-han/quyen-han.module.js';
+import { VaiTroModule } from './vai-tro/vai-tro.module.js';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { QuyenBoPhanGuard } from './permission/guards/permission-bo-phan.guard.j
     AuthModule,
     BoPhanModule,
     ThanhVienBoPhanModule,    
-    PermissionModule,
+    PermissionModule, QuyenHanModule, VaiTroModule,
   ],
 
   controllers: [AppController],
