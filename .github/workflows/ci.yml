@@ -47,7 +47,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: tm-backend
+        working-directory: backend
 
     steps:
       - name: Checkout code
@@ -58,7 +58,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: tm-backend/package-lock.json
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -112,8 +112,8 @@ jobs:
       #   with:
       #     name: backend-test-output
       #     path: |
-      #       tm-backend/newman-results.xml
-      #       tm-backend/server.log
+      #       backend/newman-results.xml
+      #       backend/server.log
       #     if-no-files-found: ignore
 
   frontend:
@@ -121,7 +121,7 @@ jobs:
     timeout-minutes: 10
     defaults:
       run:
-        working-directory: tm-frontend
+        working-directory: frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -130,7 +130,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: tm-frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
       - name: Install dependencies
         run: npm ci
 
