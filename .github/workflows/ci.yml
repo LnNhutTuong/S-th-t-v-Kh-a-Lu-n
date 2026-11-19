@@ -35,7 +35,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    # Gia tri CI tu dat, KHONG dung secrets de PR tu fork cung chay duoc
+    # Gia tri CI tu dat
     env:
       DATABASE_URL: postgresql://postgres:password@localhost:5432/task-progress
       DIRECT_URL: postgresql://postgres:password@localhost:5432/task-progress
@@ -44,6 +44,8 @@ jobs:
       FE_URL: http://localhost:5173
       PORT: 2202
       NODE_ENV: test
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_TEN: ${{ secrets.ADMIN_TEN }}
 
     defaults:
       run:
