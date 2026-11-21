@@ -4,7 +4,7 @@ import { verifyOtpRequestSchema } from "@/features/auth/schema/passwordless.sche
 import { serverApi } from "@/lib/axios/server";
 import type { LoginResponse } from "@/features/auth/type/passwordLessType";
 import axios from "axios";
-import {cookies } from "next/headers"
+import { cookies } from "next/headers"
 
 export const runtime = "nodejs";
 
