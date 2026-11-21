@@ -38,13 +38,13 @@ export const DialogContent = forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-[47%] scale-[0.97] rounded-3xl border border-white/[0.08] bg-[#0a0a0a] p-6 text-white opacity-0 shadow-[0_24px_80px_rgb(0_0_0_/_55%)] transition-[opacity,transform] duration-200 ease-out data-[state=open]:-translate-y-1/2 data-[state=open]:scale-100 data-[state=open]:opacity-100 data-[state=closed]:-translate-y-[47%] data-[state=closed]:scale-[0.97] data-[state=closed]:opacity-0 sm:p-8",
+        "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-[47%] scale-[0.97] rounded-xl border border-border bg-background p-6 font-sans text-foreground opacity-0 shadow-lg transition-[opacity,transform] duration-200 ease-out data-[state=open]:-translate-y-1/2 data-[state=open]:scale-100 data-[state=open]:opacity-100 data-[state=closed]:-translate-y-[47%] data-[state=closed]:scale-[0.97] data-[state=closed]:opacity-0 sm:p-8",
         className,
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-5 top-5 cursor-pointer rounded-xl p-2 text-white/35 transition hover:bg-white/[0.06] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+      <DialogPrimitive.Close className="absolute right-5 top-5 cursor-pointer rounded-md p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -66,7 +66,7 @@ export function DialogTitle({
 }: ComponentPropsWithoutRef<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      className={cn("text-[22px] font-normal tracking-tight", className)}
+      className={cn("text-lg font-semibold tracking-tight", className)}
       {...props}
     />
   );
@@ -78,7 +78,7 @@ export function DialogDescription({
 }: ComponentPropsWithoutRef<typeof DialogPrimitive.Description>) {
   return (
     <DialogPrimitive.Description
-      className={cn("text-sm leading-6 text-white/45", className)}
+      className={cn("text-sm leading-6 text-muted-foreground", className)}
       {...props}
     />
   );

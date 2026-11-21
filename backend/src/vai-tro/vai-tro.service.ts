@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { QueryVaiTroDto } from './dto/query-vai-tro.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { UpdateVaiTroDto } from './dto/update-vai-tro.dto.js';
 import { MA_VAI_TRO_ADMIN } from '../permission/constants/quyen-han.constants.js';
 
 @Injectable()

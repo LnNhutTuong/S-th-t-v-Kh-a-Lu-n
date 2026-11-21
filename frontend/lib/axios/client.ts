@@ -10,9 +10,9 @@ export const clientApi = axios.create({
 clientApi.interceptors.response.use(
   (res) => res,
   (error) => {
-    if (!window.location.pathname.startsWith("/auth/login")){
-      window.location.href = "/auth/login";
-    } 
+    if (error.response?.status === 401) {
+        window.location.href = "/auth/login";
+    }
     return Promise.reject(error);
   }
 );

@@ -23,7 +23,7 @@ import {
   OtpStepValues,
   emailStepSchema,
   otpStepSchema,
-} from "@/features/auth/schema/passwordless.schema";
+} from "@/schemas/passwordless.schema";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import GoogleIcon from "@/assets/companyIcon";
-import { useAuth } from "@/hook/auth";
+import { useAuth } from "@/hooks/use-auth";
 import axios from "axios";
 export function LoginPage() {
 
