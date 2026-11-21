@@ -1,4 +1,4 @@
-import { BadGatewayException, BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBoPhanDto } from './dto/create-bo-phan.dto.js';
 import { UpdateBoPhanDto } from './dto/update-bo-phan.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -122,6 +122,13 @@ export class BoPhanService {
     const boPhan = await this.prisma.boPhan.findUnique({
       where:{
         id
+      },
+      include:{
+       boPhanCha:{
+        select:{
+          ma: true, ten: true
+        }
+       }
       }
     })
 
@@ -157,7 +164,7 @@ export class BoPhanService {
     }
 
     if(dto.boPhanChaId && dto.boPhanChaId !== boPhanHienTai.boPhanChaId){
-      if(dto.boPhanChaId === LoaiBoPhan.BAN_GIAM_HIEU){
+      if(boPhanHienTai.loai === LoaiBoPhan.BAN_GIAM_HIEU){
         throw new BadRequestException("Ban Giám Hiệu không có bộ phận cha");
       }
 
