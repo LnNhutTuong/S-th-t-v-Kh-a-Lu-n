@@ -1,4 +1,4 @@
-import { boPhanType, boPhanTreeType, thanhVienBoPhanType, thieuLanhDaoType, vaiTroCoTheGanType, ungVienType, themThanhVienBody, themThanhVienResponse, SuaThanhVienBody, SuaThanhVienResponse, CapNhatNgayKetThuaBody, CapNhatNgayKetThuaResponse } from "@/features/boPhan/type/boPhan.type";
+import { boPhanType, boPhanTreeType, thanhVienBoPhanType, thieuLanhDaoType, vaiTroCoTheGanType, ungVienType, themThanhVienBody, themThanhVienResponse, SuaThanhVienBody, SuaThanhVienResponse, CapNhatNgayKetThucBody, CapNhatNgayKetThuaResponse, taoBoPhanBody, taoBoPhanResponse, suaBoPhanBody, suaBoPhanResponse, ngungHoatDongBody, ngungHoatDongResponse } from "@/features/boPhan/type/boPhan.type";
 import { clientApi } from "@/lib/axios/client";
 
 export const boPhanApi = {
@@ -49,9 +49,24 @@ export const boPhanApi = {
         return data;
     },
 
-    patchCapNhatNgayKetThuc: async (boPhanId: string, nguoiDungId: string, body: CapNhatNgayKetThuaBody) => {
+    patchCapNhatNgayKetThuc: async (boPhanId: string, nguoiDungId: string, body: CapNhatNgayKetThucBody) => {
         const {data} = await clientApi.patch<CapNhatNgayKetThuaResponse>(`/bo-phan/${boPhanId}/thanh-vien/${nguoiDungId}/ket-thuc`, body)
-        return data
+        return data;
+    },
+
+    postTaoBoPhan: async (body: taoBoPhanBody) => {
+        const {data} = await clientApi.post<taoBoPhanResponse>(`/bo-phan`, body);
+        return data;
+    },
+
+    patchSuaBoPhan: async (boPhanId: string, body: suaBoPhanBody) => {
+        const {data} = await clientApi.patch<suaBoPhanResponse>(`/bo-phan/${boPhanId}`, body);
+        return data;
+    },
+
+    patchTrangThaiBoPhan: async (boPhanId: string, body: ngungHoatDongBody) => {
+        const {data} =  await clientApi.patch<ngungHoatDongResponse>(`/bo-phan/${boPhanId}/ngung-hoat-dong`, body)
+        return data;
     }
 }   
 

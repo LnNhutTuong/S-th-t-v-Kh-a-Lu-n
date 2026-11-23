@@ -2,11 +2,11 @@ import { useBoPhan, useThieuLanhDao } from "@/hooks/use-bo-phan";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TEN_LOAI_BO_PHAN, TEN_NHOM_BO_PHAN, boPhanThieuLanhDaoType } from "@/features/boPhan/type/boPhan.type"
+import { TEN_LOAI_BO_PHAN, TEN_NHOM_BO_PHAN, boPhanThieuLanhDaoType, boPhanType } from "@/features/boPhan/type/boPhan.type"
 import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 
-type Props = { boPhanId: string | null };
+type Props = { boPhanId: string | null; onSua: (boPhan: boPhanType) => void };
 
 function DongThongTin({ nhan, giaTri }: { nhan: string; giaTri: string }) {
   return (
@@ -36,7 +36,7 @@ function ChiTietSkeleton() {
   );
 }
 
-export default function BoPhanChiTiet({ boPhanId }: Props) {
+export default function BoPhanChiTiet({ boPhanId, onSua }: Props) {
   const { data: boPhan, isLoading, isError, refetch } = useBoPhan(boPhanId);
   const {data: danhSachBoPhanThieuLanhDao} = useThieuLanhDao();
   //thằng này trả ra cái map với cái key: id, value xong đem xuống dưới xài => map thì có has
@@ -84,6 +84,7 @@ export default function BoPhanChiTiet({ boPhanId }: Props) {
           <div className="flex items-center gap-2">
             <h2 className="break-words text-xl font-semibold">{boPhan.ten}</h2>
             {thieuMap.has(boPhan.id) && <Badge variant="warning">{thieuMap.get(boPhan.id)?.thieuPho && thieuMap.get(boPhan.id)?.thieuTruong ? 'Thiếu Trưởng / Phó' : thieuMap.get(boPhan.id)?.thieuTruong ? 'Thiếu Trưởng' : 'Thiếu Phó'}</Badge>}
+            <Button type="button" variant="outline" size="sm" className="ml-auto" onClick={() => onSua(boPhan)}>Sửa</Button>
           </div>
         </div>
       </header>
@@ -98,7 +99,7 @@ export default function BoPhanChiTiet({ boPhanId }: Props) {
           />
           <DongThongTin
             nhan="Nhóm đơn vị"
-            giaTri={TEN_NHOM_BO_PHAN[boPhan.nhom] ?? boPhan.nhom}
+            giaTri={boPhan.nhom ? TEN_NHOM_BO_PHAN[boPhan.nhom] : ""}
           />
           <DongThongTin nhan="Bộ phận cha" giaTri={boPhan.boPhanCha?.ten} />
           <DongThongTin

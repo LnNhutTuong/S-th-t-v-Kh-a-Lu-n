@@ -1,4 +1,3 @@
-
 export const LoaiBoPhan = {
   BAN_GIAM_HIEU: 'BAN_GIAM_HIEU',
   KHOA: 'KHOA',
@@ -11,6 +10,31 @@ export const LoaiBoPhan = {
 } as const
 
 export type LoaiBoPhan = (typeof LoaiBoPhan)[keyof typeof LoaiBoPhan]
+
+export const TEN_LOAI_BO_PHAN: Record<LoaiBoPhan, string> = {
+  [LoaiBoPhan.BAN_GIAM_HIEU]: "Ban giám hiệu",
+  [LoaiBoPhan.KHOA]: "Khoa",
+  [LoaiBoPhan.BO_MON]: "Bộ môn",
+  [LoaiBoPhan.PHONG]: "Phòng",
+  [LoaiBoPhan.VIEN]: "Viện",
+  [LoaiBoPhan.TRUNG_TAM]: "Trung tâm",
+  [LoaiBoPhan.THU_VIEN]: "Thư viện",
+  [LoaiBoPhan.TRUONG]: "Trường",
+};
+
+export const TIEN_TO_MA: Record<LoaiBoPhan, string> = {
+  [LoaiBoPhan.BAN_GIAM_HIEU]: "BGH",
+  [LoaiBoPhan.KHOA]: "KHOA",
+  [LoaiBoPhan.BO_MON]: "BM",
+  [LoaiBoPhan.PHONG]: "PHONG",
+  [LoaiBoPhan.VIEN]: "VIEN",
+  [LoaiBoPhan.TRUNG_TAM]: "TT",
+  [LoaiBoPhan.THU_VIEN]: "TV",
+  [LoaiBoPhan.TRUONG]: "TRUONG",
+};
+
+//Phải có cái này vì có trường hợp có trung tâm bên sự nghiệp và có bên chức năng nữa~ 
+export const LoaiBpCanChonNhom: LoaiBoPhan[] = [LoaiBoPhan.TRUNG_TAM, LoaiBoPhan.TRUONG, LoaiBoPhan.VIEN];
 
 export const NhomDonVi = {
   DAO_TAO: 'DAO_TAO',
@@ -32,21 +56,21 @@ export const THU_TU_NHOM: NhomDonVi[] = [
   NhomDonVi.SU_NGHIEP,
 ];
 
-export const TEN_LOAI_BO_PHAN: Record<LoaiBoPhan, string> = {
-  [LoaiBoPhan.BAN_GIAM_HIEU]: "Ban giám hiệu",
-  [LoaiBoPhan.KHOA]: "Khoa",
-  [LoaiBoPhan.BO_MON]: "Bộ môn",
-  [LoaiBoPhan.PHONG]: "Phòng",
-  [LoaiBoPhan.VIEN]: "Viện",
-  [LoaiBoPhan.TRUNG_TAM]: "Trung tâm",
-  [LoaiBoPhan.THU_VIEN]: "Thư viện",
-  [LoaiBoPhan.TRUONG]: "Trường",
-};
-
 export const TEN_NHOM_BO_PHAN: Record<NhomDonVi, string> = {
   [NhomDonVi.DAO_TAO]: "Khối khoa chuyên môn",
   [NhomDonVi.CHUC_NANG]: "Khối phòng, ban chức năng",
   [NhomDonVi.SU_NGHIEP]: "Khối trung tâm và đơn vị trực thuộc",
+};
+
+export const CHA_HOP_LE: Record<LoaiBoPhan, LoaiBoPhan[]> = {
+  [LoaiBoPhan.BAN_GIAM_HIEU]: [],
+  [LoaiBoPhan.KHOA]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.PHONG]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.VIEN]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.TRUNG_TAM]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.THU_VIEN]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.TRUONG]: [LoaiBoPhan.BAN_GIAM_HIEU],
+  [LoaiBoPhan.BO_MON]: [LoaiBoPhan.KHOA, LoaiBoPhan.BAN_GIAM_HIEU],
 };
 
 export const CapBac = {
@@ -68,16 +92,13 @@ export type boPhanType = {
     ma: string,
     ten: string,
     loai: LoaiBoPhan,
-    nhom: NhomDonVi,
-    boPhanChaId: string,
+    nhom: NhomDonVi | null, // gào ban giám hiệu (null 2 cái này, vì cha 1)
+    boPhanChaId: string | null,
     ngungHoatDong: boolean,
-    thongTinThem: Record<string, any>,
+    thongTinThem: Record<string, unknown>,
     createdAt: Date,
     updatedAt: Date,
-    boPhanCha:{
-      ma:string,
-      ten: string
-    }
+    boPhanCha:{ ma: string; ten: string } | null
 }
 
 export type boPhanTreeType = {
@@ -85,10 +106,10 @@ export type boPhanTreeType = {
     ma: string,
     ten: string,
     loai: LoaiBoPhan,
-    nhom: NhomDonVi,
-    boPhanChaId: string,
+    nhom: NhomDonVi | null,
+    boPhanChaId: string | null,
     ngungHoatDong: boolean,
-    thongTinThem: Record<string, any>,
+    thongTinThem: Record<string, unknown>,
     createdAt: Date,
     updatedAt: Date,
     con: boPhanTreeType[],
@@ -97,8 +118,8 @@ export type boPhanTreeType = {
 export type thanhVienBoPhanType = {
   boPhanId: string,
   capBac: CapBac,
-  ngayThamGia: Date,
-  ngayKetThuc: Date | null,
+  ngayThamGia: string,
+  ngayKetThuc: string | null,
   nguoiDung: {
     id: string,
     email: string,
@@ -115,7 +136,7 @@ export type boPhanThieuLanhDaoType = {
   ma: string,
   ten: string,
   loai: LoaiBoPhan,
-  thieuTruong: true,
+  thieuTruong: boolean,
   thieuPho: boolean
 }
 
@@ -166,8 +187,8 @@ export type SuaThanhVienResponse = {
     ngayKetThuc: Date | null
 }
 
-export type CapNhatNgayKetThuaBody = {
-  ngayKetThuc?: Date
+export type CapNhatNgayKetThucBody = {
+  ngayKetThuc?: string
 }
 
 export type CapNhatNgayKetThuaResponse = {
@@ -178,5 +199,30 @@ export type CapNhatNgayKetThuaResponse = {
     ngayThamGia: Date,
     ngayKetThuc: Date
 }
+
+export type taoBoPhanBody = {
+  ma: string,
+  ten: string,
+  loai: LoaiBoPhan,
+  boPhanChaId?: string,
+  nhom?: NhomDonVi
+}
+
+export type taoBoPhanResponse = Omit<boPhanType, 'boPhanCha'>
+
+export type suaBoPhanBody = {
+  ten?: string,
+  boPhanChaId?: string,
+  nhom?: NhomDonVi
+}
+
+export type suaBoPhanResponse = Omit<boPhanType, 'boPhanCha'>
+
+export type ngungHoatDongBody = {
+  ngungHoatDong: boolean
+}
+
+export type ngungHoatDongResponse = Omit<boPhanType, 'boPhanCha'>
+
 
 

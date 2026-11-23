@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useCayBoPhan, useThieuLanhDao } from "@/hooks/use-bo-phan";
 import { Skeleton } from "@/components/ui/skeleton";
 import {Alert} from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {  
   type boPhanTreeType,
   type NhomDonVi as NhomDonViType,
@@ -95,10 +96,10 @@ function TreeSkeleton() {
   );
 }
 
-type Props = { boPhanDangChon: string | null; onChon: (id: string) => void };
+type Props = { boPhanDangChon: string | null; onChon: (id: string) => void; onThem: () => void };
 
 
-export default function BoPhanTree({boPhanDangChon, onChon }: Props) {
+export default function BoPhanTree({boPhanDangChon, onChon, onThem }: Props) {
 
 
   const [baoGomDungHoatDong, setBaoGomDungHoatDong] = useState(false);
@@ -367,23 +368,28 @@ export default function BoPhanTree({boPhanDangChon, onChon }: Props) {
         </div>
 
         {/* Ô tìm kiếm */}
-        <div className="relative">
-          <input
-            type="text"
-            value={tuKhoa}
-            onChange={(e) => setTuKhoa(e.target.value)}
-            placeholder="Lọc theo tên hoặc mã đơn vị..."
-            className="rounded-xl w-full bg-white border border-slate-300 rounded-[2px] px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#003B5C]"
-          />
-          {tuKhoa && (
-            <button
-              type="button"
-              onClick={() => setTuKhoa("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs"
-            >
-              ✕
-            </button>
-          )}
+        <div className="flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <input
+              type="text"
+              value={tuKhoa}
+              onChange={(e) => setTuKhoa(e.target.value)}
+              placeholder="Lọc theo tên hoặc mã đơn vị..."
+              className="w-full rounded-[2px] border border-slate-300 bg-white px-2.5 py-1.5 pr-7 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#003B5C] focus:outline-none"
+            />
+            {tuKhoa && (
+              <button
+                type="button"
+                onClick={() => setTuKhoa("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-700"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          <Button type="button" size="sm" className="shrink-0" onClick={onThem}>
+            + Thêm bộ phận
+          </Button>
         </div>
 
         {/* Tổng số đơn vị và bộ lọc trạng thái */}

@@ -424,13 +424,13 @@ export function LoginPage() {
             </div>
 
             {/* Nút đăng nhập Google */}
-            <a
+            <Link
               href="/api/auth/login?connection=google-oauth2"
               className="group w-full flex items-center justify-center gap-3 h-11 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 font-medium text-sm shadow-2xs hover:shadow-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#003B5C]/20"
             >
               <GoogleIcon className="w-5 h-5 shrink-0 transition-transform group-hover:scale-105" />
               <span>Đăng nhập bằng tài khoản Google</span>
-            </a>
+            </Link>
 
             <p className="text-[11px] text-slate-400 text-center mt-2.5">
               Hỗ trợ tài khoản Google Workspace do Trường ĐH An Giang cấp

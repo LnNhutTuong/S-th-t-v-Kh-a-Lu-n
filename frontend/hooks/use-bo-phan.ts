@@ -1,6 +1,6 @@
 import { boPhanApi } from "@/services/bo-phan.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { themThanhVienBody, SuaThanhVienBody, CapNhatNgayKetThuaBody } from "@/features/boPhan/type/boPhan.type";
+import { themThanhVienBody, SuaThanhVienBody, CapNhatNgayKetThucBody, taoBoPhanBody, suaBoPhanBody, ngungHoatDongBody } from "@/features/boPhan/type/boPhan.type";
 import { toast } from "sonner";
 import { layThongBaoLoi } from "@/utils/lay-thong-bao";
 
@@ -78,11 +78,11 @@ export const useThemThanhVien = (boPhanId: string | null) => {
   })
 }
 
-export const useSuaThanhVien = (boPhanId: string | null, nguoiDungId: string) => {
+export const useSuaThanhVien = (boPhanId: string | null) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: SuaThanhVienBody) => boPhanApi.patchSuaThanhVien(boPhanId as string, nguoiDungId, body),
+    mutationFn: ({ nguoiDungId, body }: { nguoiDungId: string, body: SuaThanhVienBody }) => boPhanApi.patchSuaThanhVien(boPhanId as string, nguoiDungId, body),
 
     onSuccess: () => {
       //cap nhat lai danh sach thanh vien
@@ -104,11 +104,12 @@ export const useSuaThanhVien = (boPhanId: string | null, nguoiDungId: string) =>
   })
 }
 
-export const useCapNhatNgayKetThuc = (boPhanId: string | null, nguoiDungId: string) => {
+/**Cập nhật ngày kết thúc của thành viên bộ phận */
+export const useCapNhatNgayKetThuc = (boPhanId: string | null) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: CapNhatNgayKetThuaBody) => boPhanApi.patchCapNhatNgayKetThuc(boPhanId as string, nguoiDungId, body),
+    mutationFn: ({nguoiDungId, body}: { nguoiDungId: string, body: CapNhatNgayKetThucBody}) => boPhanApi.patchCapNhatNgayKetThuc(boPhanId as string, nguoiDungId, body),
 
     onSuccess: () => {
       // cap nhat lai danh sach thanh vien
@@ -135,3 +136,66 @@ export const useCapNhatNgayKetThuc = (boPhanId: string | null, nguoiDungId: stri
   })
 }
 
+export const useTaoBoPhan = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: taoBoPhanBody) => boPhanApi.postTaoBoPhan(body),
+
+    //update lai het cac query co key bo phan
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['bo-phan']
+      })
+
+      toast.success("Tạo bộ phận thành công");
+    },
+
+    onError: (error) => {
+      toast.error(layThongBaoLoi(error));
+    }
+  })
+}
+
+export const useSuaBoPhan = (boPhanId: string | null) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: suaBoPhanBody) => boPhanApi.patchSuaBoPhan(boPhanId as string, body),
+
+    //update lai het cac query co key bo phan
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['bo-phan']
+      })
+
+      toast.success("Cập nhật bộ phận thành công");
+    },
+
+    onError: (error) => {
+      toast.error(layThongBaoLoi(error));
+    }
+  })
+}
+
+/**Cập nhật trạng thái của bộ phận (Ngưng hoạt động) */
+export const useCapNhatTrangThai = (boPhanId: string | null) => {
+  const queryClient = useQueryClient();
+
+   return useMutation({
+    mutationFn: (body: ngungHoatDongBody) => boPhanApi.patchTrangThaiBoPhan(boPhanId as string, body),
+
+    //update lai het cac query co key bo phan
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['bo-phan']
+      })
+
+      toast.success("Cập nhật bộ phận thành công");
+    },
+
+    onError: (error) => {
+      toast.error(layThongBaoLoi(error));
+    }
+  })
+}

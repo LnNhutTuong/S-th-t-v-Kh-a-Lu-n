@@ -3,17 +3,31 @@ import { useState } from "react"
 import BoPhanTree from "./bo-phan-tree";
 import BoPhanChiTiet from "./thong-tin-chung/bo-phan-chi-tiet"
 import  BoPhanThanhVien  from "./thanh-vien/bo-phan-thanh-vien";
+import DialogBoPhan from "./thong-tin-chung/dialog/dialog-bo-phan";
+import type { boPhanType } from "@/features/boPhan/type/boPhan.type";
 export default function QuanLyBoPhan(){
     
     const [boPhanDangChon, setBoPhanDangChon] = useState<string | null>(null);
+    const [dialogMo, setDialogMo] = useState(false);
+    const [boPhanDangSua, setBoPhanDangSua] = useState<boPhanType | null>(null);
+
+    const themBoPhan = () => {
+        setBoPhanDangSua(null);
+        setDialogMo(true);
+    };
+
+    const suaBoPhan = (boPhan: boPhanType) => {
+        setBoPhanDangSua(boPhan);
+        setDialogMo(true);
+    };
 
     return(
         <div className="flex h-full mx-4 my-2 rounded-xl border-1">
-            <BoPhanTree boPhanDangChon={boPhanDangChon} onChon={setBoPhanDangChon} />
+            <BoPhanTree boPhanDangChon={boPhanDangChon} onChon={setBoPhanDangChon} onThem={themBoPhan} />
 
             {boPhanDangChon ? (
                 <div className="flex flex-col flex-1">
-                    <BoPhanChiTiet boPhanId={boPhanDangChon} />
+                    <BoPhanChiTiet boPhanId={boPhanDangChon} onSua={suaBoPhan} />
                     <BoPhanThanhVien boPhanId={boPhanDangChon}/>
                 </div>
             ): 
@@ -26,6 +40,7 @@ export default function QuanLyBoPhan(){
                     </div>
                 </section>
             }
+            <DialogBoPhan open={dialogMo} onOpenChange={setDialogMo} boPhan={boPhanDangSua} />
         </div>
     )
 }

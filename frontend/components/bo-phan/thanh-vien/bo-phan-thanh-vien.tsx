@@ -17,7 +17,9 @@ import { TenCapBac, type thanhVienBoPhanType } from "@/features/boPhan/type/boPh
 import { useDsThanhVien } from "@/hooks/use-bo-phan";
 import { Ellipsis } from "lucide-react";
 import { useState, useEffect } from "react";
+import DialogDoiVaiTro from "./dialog/doi-vai-tro";
 import DialogThemThanhVien from "./dialog/them-thanh-vien";
+import DialogKetThuc from "./dialog/ket-thuc";
 
 type Props = { boPhanId: string | null };
 
@@ -148,6 +150,27 @@ export default function BoPhanThanhVien({ boPhanId }: Props) {
           onOpenChange={setMoDialogThemThanhVien}
         />
       )}
+
+      <DialogDoiVaiTro
+        boPhanId={boPhanId}
+        thanhVien={thanhVienDoiVaiTro}
+        onOpenChange={(open) => {
+          if (!open){
+            setThanhVienDoiVaiTro(null);
+          } 
+        }}
+      />
+
+      <DialogKetThuc 
+        key={thanhVienKetThuc?.nguoiDung.id ?? ""} 
+        boPhanId={boPhanId} 
+        thanhVien={thanhVienKetThuc} 
+        onOpenChange={(open) => {
+          if(!open){
+            setThanhVienKetThuc(null);
+          }
+        }} 
+      />
 
       {isLoading ? (
         <div aria-label="Đang tải danh sách thành viên" aria-live="polite">
