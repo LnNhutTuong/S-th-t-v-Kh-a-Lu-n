@@ -5,7 +5,6 @@ import { UpdateNgayKetThucDto } from './dto/update-ket-thuc.dto.js';
 import { BoPhanService } from "../bo-phan/bo-phan.service.js"
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CapBac, PhamViVaiTro } from '../generated/prisma/enums.js';
-import { dot } from 'node:test/reporters';
 import { Prisma } from '../generated/prisma/client.js';
 
 @Injectable()
@@ -59,18 +58,18 @@ export class ThanhVienBoPhanService {
       throw new BadRequestException(`Vai trò này không phù hợp với bộ phận hiện tại `)
     }
 
-    //check xem cai vai tro do dang co bao nhieu nguoi giu trong bo phan nay, va chua bi xoa
-    // const checkSoLuongNguoiDangGiuVaiTro = await this.prisma.thanhVienBoPhan.count({
-    //   where:{
-    //       boPhanId,
-    //       vaiTroId: vaiTro.id,
-    //       ngayKetThuc: null
-    //   }
-    // })
+    // check xem cai vai tro do dang co bao nhieu nguoi giu trong bo phan nay, va chua bi xoa
+    const checkSoLuongNguoiDangGiuVaiTro = await this.prisma.thanhVienBoPhan.count({
+      where:{
+          boPhanId,
+          vaiTroId: vaiTro.id,
+          ngayKetThuc: null
+      }
+    })
 
-    // if(vaiTro.soLuongToiDa !== null && checkSoLuongNguoiDangGiuVaiTro >= vaiTro.soLuongToiDa){
-    //   throw new BadRequestException(`Đã có ${checkSoLuongNguoiDangGiuVaiTro}/${vaiTro.soLuongToiDa} người giữ vai trò ${vaiTro.ten}`)
-    // }
+    if(vaiTro.soLuongToiDa !== null && checkSoLuongNguoiDangGiuVaiTro >= vaiTro.soLuongToiDa){
+      throw new BadRequestException(`Đã có ${checkSoLuongNguoiDangGiuVaiTro}/${vaiTro.soLuongToiDa} người giữ vai trò ${vaiTro.ten}`)
+    }
 
     if (!vaiTro.capBac) {
       throw new BadRequestException("Vai trò này không có cấp bậc")
@@ -93,6 +92,7 @@ export class ThanhVienBoPhanService {
       if (e.code === 'P2002') {
         throw new BadRequestException('Bộ phận này đã có trưởng')
       }
+      throw e;
     }
 
   }
@@ -238,8 +238,73 @@ export class ThanhVienBoPhanService {
       if (e.code === 'P2002') {
         throw new BadRequestException('Bộ phận này đã có trưởng')
       }
+      throw e;
     }
     
+
+  } 
+
+  async LayVaiTroChoBoPhan(boPhanId: string){
+    const boPhan = await this.boPhanService.findOne(boPhanId);
+
+    return this.prisma.vaiTro.findMany({
+      where:{
+        phamVi: PhamViVaiTro.BO_PHAN, loaiBoPhan: boPhan.loai
+      },
+      select:{
+        id: true, ten: true, capBac: true, soLuongToiDa: true
+      },
+      orderBy:{
+        capBac: 'asc'
+      }
+    })
+
+  }
+
+  async TimUngVien(boPhanId: string, tuKhoa: string){
+
+    if(!tuKhoa || tuKhoa.length < 2){
+      return [];
+    }
+
+    return this.prisma.nguoiDung.findMany({
+      where: {
+        deletedAt: null,
+
+        OR: [
+          {
+            email: {
+              contains: tuKhoa,
+              mode: 'insensitive',
+            },
+          },
+          {
+            ten: {
+              contains: tuKhoa,
+              mode: 'insensitive',
+            },
+          },
+        ],
+
+        // Loại bỏ người đang thuộc bộ phận này
+        NOT: {
+          thanhVienBoPhan: {
+            some: {
+              boPhanId,
+              ngayKetThuc: null,
+            },
+          },
+        },
+      },
+
+      take: 10,
+
+      select: {
+        id: true,
+        ten: true,
+        email: true,
+      },
+    });
 
   }
 

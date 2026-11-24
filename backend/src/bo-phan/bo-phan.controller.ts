@@ -72,4 +72,16 @@ export class BoPhanController {
     return this.thanhVienBoPhanService.updateThanhVien(boPhanId, nguoiDungId, dto)
   }
 
+  @RequirePermission(QUYEN.THANH_VIEN_QUAN_LY)
+  @Get(':boPhanId/vai-tro-co-the-gan')
+  getVaiTroChoBoPhan(@Param('boPhanId') boPhanId: string, ){
+    return this.thanhVienBoPhanService.LayVaiTroChoBoPhan(boPhanId)
+  }
+
+  @RequirePermission(QUYEN.THANH_VIEN_QUAN_LY)
+  @Get(':boPhanId/ung-vien')
+  getUngVien( @Param('boPhanId') boPhanId: string, @Query('tuKhoa') tuKhoa: string){
+    return this.thanhVienBoPhanService.TimUngVien(boPhanId, tuKhoa);
+  }
+
 }

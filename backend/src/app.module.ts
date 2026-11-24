@@ -12,6 +12,7 @@ import { ThanhVienBoPhanModule } from './thanh-vien-bo-phan/thanh-vien-bo-phan.m
 import { QuyenBoPhanGuard } from './permission/guards/permission-bo-phan.guard.js';
 import { QuyenHanModule } from './quyen-han/quyen-han.module.js';
 import { VaiTroModule } from './vai-tro/vai-tro.module.js';
+import { NguoiDungModule } from './nguoi-dung/nguoi-dung.module.js';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { VaiTroModule } from './vai-tro/vai-tro.module.js';
     AuthModule,
     BoPhanModule,
     ThanhVienBoPhanModule,    
-    PermissionModule, QuyenHanModule, VaiTroModule,
+    PermissionModule, QuyenHanModule, VaiTroModule, NguoiDungModule,
   ],
 
   controllers: [AppController],
