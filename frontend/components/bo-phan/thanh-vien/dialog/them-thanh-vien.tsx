@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import {Loader2} from "lucide-react";
 
 type Props = {boPhanId: string, open: boolean; onOpenChange: (open: boolean) => void}
 
@@ -87,7 +88,7 @@ export default function DialogThemThanhVien({boPhanId, open, onOpenChange}: Prop
                                     />
                                     {tuKhoa.trim().length >= 2 && (
                                         <div className="absolute inset-x-0 top-full z-10 mt-1 max-h-48 overflow-y-auto rounded-lg border border-border bg-background shadow-md">
-                                            {dangTaiUngVien ? (
+                                            {dangTaiUngVien || tuKhoa !== tuKhoaTre ? (
                                                 <div className="space-y-2 p-3">
                                                     <Skeleton className="h-4 w-2/3" />
                                                     <Skeleton className="h-4 w-1/2" />
@@ -137,7 +138,7 @@ export default function DialogThemThanhVien({boPhanId, open, onOpenChange}: Prop
 
                     <div className="flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={dongDialog}>Hủy</Button>
-                        <Button type="submit" disabled={isPending}>Thêm</Button>
+                        <Button type="submit" disabled={isPending}>Thêm {isPending && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}</Button>
                     </div>
                 </form>
             </DialogContent>

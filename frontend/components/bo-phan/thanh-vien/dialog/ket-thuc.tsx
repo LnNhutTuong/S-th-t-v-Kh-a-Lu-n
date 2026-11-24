@@ -31,7 +31,7 @@ export default function DialogKetThuc({ boPhanId, thanhVien, onOpenChange }: Pro
                 <DialogHeader>
                     <DialogTitle>Kết thúc tham gia</DialogTitle>
                     <DialogDescription>
-                        <p>Kết thúc việc tham gia của <span className="font-bold text-black">{thanhVien?.nguoiDung.ten}</span> ? </p>
+                        Kết thúc việc tham gia của <span className="font-bold text-black">{thanhVien?.nguoiDung.ten}</span> ? 
                         Hệ thống chỉ <span className="underline font-bold">đánh dấu</span> ngày kết thúc, <span className="underline font-bold">không xóa dòng</span>.
                     </DialogDescription>
                 </DialogHeader>

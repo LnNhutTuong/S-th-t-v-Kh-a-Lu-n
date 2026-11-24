@@ -28,7 +28,7 @@ export default function TrangChu() {
   return (
     
     <>
-      <div className="flex gap-10">
+      <div className="flex gap-10 ">
         {dsMenu && dsMenu.length <= 1 ?
         <div className=" w-full flex flex-col justify-center items-center rounded-xl border">
           <h1 className="text-xl font-bold">Xin chào, {user?.ten}!</h1>

@@ -64,6 +64,11 @@ export const useThemThanhVien = (boPhanId: string | null) => {
       queryClient.invalidateQueries({
         queryKey: ['bo-phan', boPhanId, 'thanhVien'], //tai lai ds thanh vien
       })
+      
+      //cap nhat lai danh sach ung vien
+      queryClient.invalidateQueries({
+        queryKey: ['bo-phan', boPhanId, 'ung-vien']
+      })
 
       queryClient.invalidateQueries({
         queryKey: ['bo-phan', 'thieu-lanh-dao'], // tai lai bo phan thieu
@@ -148,7 +153,9 @@ export const useTaoBoPhan = () => {
         queryKey: ['bo-phan']
       })
 
-      toast.success("Tạo bộ phận thành công");
+      toast.success("Tạo bộ phận thành công", {
+        description: new Date().toLocaleString(),
+      });
     },
 
     onError: (error) => {
@@ -169,7 +176,9 @@ export const useSuaBoPhan = (boPhanId: string | null) => {
         queryKey: ['bo-phan']
       })
 
-      toast.success("Cập nhật bộ phận thành công");
+      toast.success("Cập nhật bộ phận thành công",
+        { description: new Date().toLocaleString(), }
+      );
     },
 
     onError: (error) => {
@@ -191,7 +200,9 @@ export const useCapNhatTrangThai = (boPhanId: string | null) => {
         queryKey: ['bo-phan']
       })
 
-      toast.success("Cập nhật bộ phận thành công");
+      toast.success("Cập nhật bộ phận thành công", {
+        description: new Date().toLocaleString(),
+      });
     },
 
     onError: (error) => {

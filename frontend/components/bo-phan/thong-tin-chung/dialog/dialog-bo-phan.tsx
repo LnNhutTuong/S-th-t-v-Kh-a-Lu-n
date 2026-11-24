@@ -4,15 +4,16 @@ import { boPhanTreeType, boPhanType, CHA_HOP_LE, LoaiBoPhan, LoaiBpCanChonNhom, 
 import { boPhanForm, boPhanSchema } from "@/features/boPhan/schema/bo-phan.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useCayBoPhan, useSuaBoPhan, useTaoBoPhan } from "@/hooks/use-bo-phan";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { goiYMaBoPhan } from "@/utils/goi-y-ma-bo-phan";
-
+import { goiYMaBoPhan } from "@/utils/bo-phan/goi-y-ma-bo-phan";
+import { ChuanHoaTenBp } from "@/utils/bo-phan/chuan-hoa-ten-bp";
+import { toast } from "sonner";
 type Props = { open: boolean, onOpenChange: (open: boolean) => void, boPhan: boPhanType | null, boPhanChaMacDinh?: string }
 
 // tra ve cai mang cha` ba' nen viet func bien thanh mang
@@ -44,23 +45,6 @@ export default function DialogBoPhan({ open, onOpenChange, boPhan, boPhanChaMacD
 
     const { reset } = form;
 
-    useEffect(() => {
-        if (!open) return;
-        reset(boPhan ? {
-            ma: boPhan.ma,
-            ten: boPhan.ten,
-            loai: boPhan.loai,
-            boPhanChaId: boPhan.boPhanChaId ?? "",
-            nhom: boPhan.nhom ?? ""
-        } : {
-            ma: "",
-            ten: "",
-            loai: "",
-            boPhanChaId: boPhanChaMacDinh ?? "",
-            nhom: ""
-        });
-    }, [open, boPhan, boPhanChaMacDinh, reset]);
-
     const tao = useTaoBoPhan();
     const sua = useSuaBoPhan(boPhan?.id ?? "");
     const dangGui = isEdit ? sua.isPending : tao.isPending;
@@ -82,12 +66,15 @@ export default function DialogBoPhan({ open, onOpenChange, boPhan, boPhanChaMacD
         if (chaHienTai && !CHA_HOP_LE[loaiMoi].includes(chaHienTai.loai)){
             form.setValue("boPhanChaId", "");
         } 
+
+        capNhatMaGoiY(form.getValues("ten"), loaiMoi)
     }
 
     const {data: cayBoPhan, isLoading: dangTaiCay} = useCayBoPhan(false);
 
     const listBoPhan = useMemo(()=> lamPhang(cayBoPhan ?? []), [cayBoPhan]);
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const loai = form.watch("loai"); //lay cai loai ra o cac input co key la loai
 
     const danhSachCha = useMemo(() => {
@@ -119,14 +106,36 @@ export default function DialogBoPhan({ open, onOpenChange, boPhan, boPhanChaMacD
 
     }, [daCoBanGiamHieu])
 
-    console.log("ma goi y: ",goiYMaBoPhan("An Giang", LoaiBoPhan.BAN_GIAM_HIEU, new Set(["BM_AG"])));
+    //Lay ca nhung thang da bi ngung hoat dong thi moi check all ma duoc
+    const {data: cayBoPhanTatCa} = useCayBoPhan(true);
+
+    //Loai tru cai ma dang xai ra nua~~~~
+    const cacMaBoPhanKhac = useMemo(() => {
+        return new Set(
+            lamPhang(cayBoPhanTatCa ?? [])
+            .filter((b) => b.id !== boPhan?.id) // loai tru bo phan hien tai
+            .map((b) => b.ma.toUpperCase())
+        );
+    }, [cayBoPhanTatCa, boPhan?.id]);
+
+
+    const daSuaMaTay = useRef(false);
+
+    const capNhatMaGoiY = (ten: string, loaiHienTai: LoaiBoPhan) => {
+        if(isEdit || daSuaMaTay.current) return;
+
+        form.setValue("ma", goiYMaBoPhan(ten, loaiHienTai || "", cacMaBoPhanKhac))
+    }
+
+    const tenDangGo = form.watch("ten").trim();
+    const tenXemTruoc = ChuanHoaTenBp(tenDangGo, loai);
 
     const onSubmit = (giaTri: boPhanForm) => {
 
         if(!isEdit){
             const body: taoBoPhanBody = {
                 ma: giaTri.ma,
-                ten: giaTri.ten,
+                ten: ChuanHoaTenBp(giaTri.ten, giaTri.loai),
                 loai: giaTri.loai as LoaiBoPhan,
                 boPhanChaId: giaTri.boPhanChaId || undefined,
                 nhom: LoaiBpCanChonNhom.includes(giaTri.loai as LoaiBoPhan) ? giaTri.nhom as NhomDonVi : undefined,
@@ -137,10 +146,10 @@ export default function DialogBoPhan({ open, onOpenChange, boPhan, boPhanChaMacD
             if(!boPhan) return;
 
             const body: suaBoPhanBody = {};
-
-            if(giaTri.ten !== boPhan.ten){
-                body.ten = giaTri.ten;
-            } 
+            if (giaTri.ten.trim() !== boPhan.ten) { 
+                const tenMoi = ChuanHoaTenBp(giaTri.ten, boPhan.loai); 
+                if (tenMoi !== boPhan.ten) body.ten = tenMoi; 
+            }
             
             if(giaTri.boPhanChaId !== (boPhan.boPhanChaId ?? "")){
                 body.boPhanChaId = giaTri.boPhanChaId;
@@ -153,6 +162,9 @@ export default function DialogBoPhan({ open, onOpenChange, boPhan, boPhanChaMacD
             if(Object.keys(body).length === 0){
                 form.reset();
                 onOpenChange(false)
+                toast.message('Không có gì thay đổi', {
+                    description: new Date().toLocaleString(),
+                })
                 return;
             }
 
@@ -161,6 +173,26 @@ export default function DialogBoPhan({ open, onOpenChange, boPhan, boPhanChaMacD
     }
 
     const dong = () => onOpenChange(false);
+    
+    useEffect(() => {
+        if (!open) return;
+
+        daSuaMaTay.current = false;
+        reset(boPhan ? {
+            ma: boPhan.ma,
+            ten: boPhan.ten,
+            loai: boPhan.loai,
+            boPhanChaId: boPhan.boPhanChaId ?? "",
+            nhom: boPhan.nhom ?? ""
+        } : {
+            ma: "",
+            ten: "",
+            loai: "",
+            boPhanChaId: boPhanChaMacDinh ?? "",
+            nhom: ""
+        });
+    }, [open, boPhan, boPhanChaMacDinh, reset]);
+
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -173,14 +205,15 @@ export default function DialogBoPhan({ open, onOpenChange, boPhan, boPhanChaMacD
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <FieldGroup>
                         <Field>
-                            <FieldLabel htmlFor="ma">Mã</FieldLabel>
-                            <Input id="ma" className="border-input bg-background text-foreground" {...form.register("ma")} readOnly={isEdit} />
+                            <FieldLabel htmlFor="ma">Mã: <span className="text-xs text-muted-foreground">Được gợi ý từ tên, bạn có thể chỉnh sửa.</span></FieldLabel>
+                            <Input id="ma" className="border-input bg-background text-foreground" {...form.register("ma", { onChange: (e) => { daSuaMaTay.current = e.target.value !== ""; } })} readOnly={isEdit} />
                             <FieldError errors={[form.formState.errors.ma]} />
                         </Field>
 
                         <Field>
                             <FieldLabel htmlFor="ten">Tên</FieldLabel>
-                            <Input id="ten" className="border-input bg-background text-foreground" {...form.register("ten")} />
+                            <Input id="ten" className="border-input bg-background text-foreground" {...form.register("ten", { onChange: (e) => capNhatMaGoiY(e.target.value, form.getValues("loai") as LoaiBoPhan) })} />
+                            {tenDangGo && tenXemTruoc !== tenDangGo && (!isEdit || tenDangGo !== boPhan?.ten) && <p className="text-xs text-muted-foreground">Tên sẽ được lưu: <strong>{tenXemTruoc}</strong></p>}
                             <FieldError errors={[form.formState.errors.ten]} />
                         </Field>
 

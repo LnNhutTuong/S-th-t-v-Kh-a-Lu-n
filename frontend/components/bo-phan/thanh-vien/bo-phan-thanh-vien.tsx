@@ -16,7 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TenCapBac, type thanhVienBoPhanType } from "@/features/boPhan/type/boPhan.type";
 import { useDsThanhVien } from "@/hooks/use-bo-phan";
 import { Ellipsis } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import DialogDoiVaiTro from "./dialog/doi-vai-tro";
 import DialogThemThanhVien from "./dialog/them-thanh-vien";
 import DialogKetThuc from "./dialog/ket-thuc";
@@ -79,7 +79,7 @@ function DongThanhVien({
             : "Đang làm"}
         </TableCell>
       )}
-      <TableCell className="text-center">
+      <TableCell className="text-right">
         {thanhVien.ngayKetThuc ? "—" : (
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -103,7 +103,13 @@ function DongThanhVien({
 }
 
 export default function BoPhanThanhVien({ boPhanId }: Props) {
+  const [prevBoPhanId, setPrevBoPhanId] = useState(boPhanId);
   const [baoGomDaKetThuc, setBaoGomDaKetThuc] = useState(false);
+
+  if (boPhanId !== prevBoPhanId) {
+    setPrevBoPhanId(boPhanId);
+    setBaoGomDaKetThuc(false);
+  }
 
   const [moDialogThemThanhVien, setMoDialogThemThanhVien] = useState(false);
   const {
@@ -117,9 +123,6 @@ export default function BoPhanThanhVien({ boPhanId }: Props) {
   const [thanhVienKetThuc, setThanhVienKetThuc] = useState<thanhVienBoPhanType | null>(null);
 
 
-  useEffect(() => {
-    setBaoGomDaKetThuc(false);
-  }, [boPhanId]);
 
   return (
     <section className="min-w-0 flex-1 overflow-y-auto border-l px-4 py-5 sm:px-6">

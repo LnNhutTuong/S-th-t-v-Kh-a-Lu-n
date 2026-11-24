@@ -2,11 +2,12 @@ import { useBoPhan, useThieuLanhDao } from "@/hooks/use-bo-phan";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TEN_LOAI_BO_PHAN, TEN_NHOM_BO_PHAN, boPhanThieuLanhDaoType, boPhanType } from "@/features/boPhan/type/boPhan.type"
+import { LoaiBoPhan, TEN_LOAI_BO_PHAN, TEN_NHOM_BO_PHAN, boPhanThieuLanhDaoType, boPhanType } from "@/features/boPhan/type/boPhan.type"
 import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
+import { CHA_HOP_LE } from "@/features/boPhan/type/boPhan.type";
 
-type Props = { boPhanId: string | null; onSua: (boPhan: boPhanType) => void };
+type Props = { boPhanId: string | null; onSua: (boPhan: boPhanType) => void, onNgungHoatDong: (boPhan: boPhanType) => void, onThemCon: (boPhanId: string) => void};
 
 function DongThongTin({ nhan, giaTri }: { nhan: string; giaTri: string }) {
   return (
@@ -36,7 +37,7 @@ function ChiTietSkeleton() {
   );
 }
 
-export default function BoPhanChiTiet({ boPhanId, onSua }: Props) {
+export default function BoPhanChiTiet({ boPhanId, onSua, onNgungHoatDong, onThemCon }: Props) {
   const { data: boPhan, isLoading, isError, refetch } = useBoPhan(boPhanId);
   const {data: danhSachBoPhanThieuLanhDao} = useThieuLanhDao();
   //thằng này trả ra cái map với cái key: id, value xong đem xuống dưới xài => map thì có has
@@ -76,16 +77,38 @@ export default function BoPhanChiTiet({ boPhanId, onSua }: Props) {
     );
   }
 
+  const coTheLamCha = !boPhan.ngungHoatDong && Object.values(CHA_HOP_LE).some((dsLoai) => dsLoai.includes(boPhan.loai));
+
   return (
     <section className="min-w-0 flex-1 py-5 sm:px-6">
       <header className="mb-5 border-b pb-4">
-        <div>
-          <p className="mb-1 text-sm text-muted-foreground">Chi tiết bộ phận</p>
-          <div className="flex items-center gap-2">
-            <h2 className="break-words text-xl font-semibold">{boPhan.ten}</h2>
-            {thieuMap.has(boPhan.id) && <Badge variant="warning">{thieuMap.get(boPhan.id)?.thieuPho && thieuMap.get(boPhan.id)?.thieuTruong ? 'Thiếu Trưởng / Phó' : thieuMap.get(boPhan.id)?.thieuTruong ? 'Thiếu Trưởng' : 'Thiếu Phó'}</Badge>}
-            <Button type="button" variant="outline" size="sm" className="ml-auto" onClick={() => onSua(boPhan)}>Sửa</Button>
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="mb-1 text-sm text-muted-foreground">Chi tiết bộ phận</p>
+            <div className="flex items-center gap-2">
+              <h2 className="break-words text-xl font-semibold">{boPhan.ten}</h2>
+              {thieuMap.has(boPhan.id) && <Badge variant="warning">{thieuMap.get(boPhan.id)?.thieuPho && thieuMap.get(boPhan.id)?.thieuTruong ? 'Thiếu Trưởng / Phó' : thieuMap.get(boPhan.id)?.thieuTruong ? 'Thiếu Trưởng' : 'Thiếu Phó'}</Badge>}    
+            </div>
           </div>
+          <div className="flex flex-col gap-3 items-center">
+            <Button type="button" size="sm" className="ml-auto bg-yellow-400/70 text-black hover:bg-yellow-500/90 cursor-pointer" onClick={() => onSua(boPhan)}>Sửa thông tin</Button>
+            {coTheLamCha && 
+            <Button type="button" size="sm" className="ml-auto bg-green-400/70 text-black hover:bg-green-500/90 cursor-pointer" onClick={() => onThemCon(boPhan.id)}>Thêm bộ phận con</Button>}
+            {
+              boPhan.loai !== LoaiBoPhan.BAN_GIAM_HIEU && 
+              <Button
+              type="button"
+              size="sm"
+              variant={boPhan.ngungHoatDong ? "default" : "destructive"}
+              className="ml-auto"
+              onClick={() => onNgungHoatDong(boPhan)}
+            >
+              {boPhan.ngungHoatDong ? "Kích hoạt lại" : "Ngừng hoạt động"}
+            </Button>
+            }
+            
+          </div>
+          
         </div>
       </header>
 
@@ -101,7 +124,7 @@ export default function BoPhanChiTiet({ boPhanId, onSua }: Props) {
             nhan="Nhóm đơn vị"
             giaTri={boPhan.nhom ? TEN_NHOM_BO_PHAN[boPhan.nhom] : ""}
           />
-          <DongThongTin nhan="Bộ phận cha" giaTri={boPhan.boPhanCha?.ten} />
+          <DongThongTin nhan="Bộ phận cha" giaTri={boPhan.boPhanCha?.ten ?? ""} />
           <DongThongTin
             nhan="Trạng thái"
             giaTri={boPhan.ngungHoatDong ? "Ngừng hoạt động" : "Đang hoạt động"}

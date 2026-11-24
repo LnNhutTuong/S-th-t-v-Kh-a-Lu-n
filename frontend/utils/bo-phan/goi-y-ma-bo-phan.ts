@@ -1,5 +1,5 @@
 import { LoaiBoPhan, TEN_LOAI_BO_PHAN, TIEN_TO_MA } from "@/features/boPhan/type/boPhan.type";
-
+import { boDau } from "../xu-ly-chuoi";
 export const goiYMaBoPhan = (ten: string, loai: LoaiBoPhan | "", cacMaDaCo: Set<string>): string => {
     const tenBp = ten.trim();
 
@@ -10,11 +10,9 @@ export const goiYMaBoPhan = (ten: string, loai: LoaiBoPhan | "", cacMaDaCo: Set<
     if(loai === LoaiBoPhan.BAN_GIAM_HIEU){
         return "BGH";
     }
-
-    const khongDau = ten.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/đ/g, "d");
     
     const tachTu = (s: string): string[] => 
-        s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/đ/g, "d").split(/[^a-z0-9]+/).filter(Boolean);
+        boDau(s).split(/[^a-z0-9]+/).filter(Boolean);
 
     let tu = tachTu(tenBp);
 

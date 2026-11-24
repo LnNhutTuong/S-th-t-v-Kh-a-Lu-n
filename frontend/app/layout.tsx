@@ -23,7 +23,10 @@ export default function RootLayout({
                         minWidth: "400px",
                         minHeight: "72px",
                     },
-                }} />
+                }} closeButton
+                />
+                
+
             </body>
 
         </html>
