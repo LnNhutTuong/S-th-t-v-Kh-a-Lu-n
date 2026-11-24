@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverApi } from "@/lib/axios/server";
-import type { AuthUser } from "@/types/auth-user";
+import type { AuthUser } from "@/features/auth/type/authUser";
 import axios from "axios";
 export const runtime = "nodejs";
 
