@@ -2542,6 +2542,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"",
 									"pm.test(\"201\", () => pm.response.to.have.status(201));",
 									"pm.test(\"co quyen\", () => pm.expect(pm.response.json().quyenHan.length).to.be.above(0));"
 								],
@@ -2551,11 +2552,8 @@
 							}
 						}
 					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
