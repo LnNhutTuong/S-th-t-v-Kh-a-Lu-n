@@ -18,6 +18,10 @@ export class InternalKeyGuard {
     }
 
     //check lan 2
+    if(typeof sent !== 'string'){
+      throw new UnauthorizedException('Lỗi đăng nhập')
+    }
+
     const bufSent = Buffer.from(sent);
     const bufKey = Buffer.from(key)
 
