@@ -4,7 +4,7 @@
 		"name": "backend_ci",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "49420529",
-		"_collection_link": "https://lnnhuttuong-4213230.postman.co/workspace/S%E1%BB%B1-th%E1%BA%ADt-v%E1%BB%81-Kh%C3%B3a-Lu%C3%A2n~52f0d478-b452-4a26-aee7-b2d298f15c20/collection/49420529-aee6a7ef-c525-46f9-a823-9801103e101f?action=share&source=collection_link&creator=49420529"
+		"_collection_link": "https://lnnhuttuong-4213230.postman.co/workspace/52f0d478-b452-4a26-aee7-b2d298f15c20/collection/49420529-aee6a7ef-c525-46f9-a823-9801103e101f?action=share&source=collection_link&creator=49420529"
 	},
 	"item": [
 		{
@@ -2531,7 +2531,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"if (!pm.environment.get(\"chayThatSu\")) { pm.execution.skipRequest(); }"
+									"if (pm.environment.get(\"chayThatSu\") !== \"1\") { pm.execution.skipRequest(); }"
 								],
 								"type": "text/javascript",
 								"packages": {},
@@ -2542,7 +2542,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.expect(pm.response.json().quyenHan.length).to.be.above(0);"
+									"pm.test(\"201\", () => pm.response.to.have.status(201));",
+									"pm.test(\"co quyen\", () => pm.expect(pm.response.json().quyenHan.length).to.be.above(0));"
 								],
 								"type": "text/javascript",
 								"packages": {},
@@ -2558,7 +2559,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"tuVaiTroId\":\"{{vtPhoBoMon}}\"\n}",
+							"raw": "{\n    \"tuVaiTroId\":\"{{vtPhoBoMon}}\"\n}\n\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2869,30 +2870,6 @@
 			"value": ""
 		},
 		{
-			"key": "idBgh",
-			"value": ""
-		},
-		{
-			"key": "maKhoa",
-			"value": ""
-		},
-		{
-			"key": "idKhoa",
-			"value": ""
-		},
-		{
-			"key": "maBoMon",
-			"value": ""
-		},
-		{
-			"key": "idBoMon",
-			"value": ""
-		},
-		{
-			"key": "maKhoaSai",
-			"value": ""
-		},
-		{
 			"key": "tokenNgoai",
 			"value": ""
 		},
@@ -2922,6 +2899,30 @@
 		},
 		{
 			"key": "idTv",
+			"value": ""
+		},
+		{
+			"key": "idBgh",
+			"value": ""
+		},
+		{
+			"key": "maKhoa",
+			"value": ""
+		},
+		{
+			"key": "idKhoa",
+			"value": ""
+		},
+		{
+			"key": "maBoMon",
+			"value": ""
+		},
+		{
+			"key": "idBoMon",
+			"value": ""
+		},
+		{
+			"key": "maKhoaSai",
 			"value": ""
 		},
 		{
