@@ -1,0 +1,2952 @@
+{
+	"info": {
+		"_postman_id": "aee6a7ef-c525-46f9-a823-9801103e101f",
+		"name": "backend_ci",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49420529",
+		"_collection_link": "https://lnnhuttuong-4213230.postman.co/workspace/S%E1%BB%B1-th%E1%BA%ADt-v%E1%BB%81-Kh%C3%B3a-Lu%C3%A2n~52f0d478-b452-4a26-aee7-b2d298f15c20/collection/49420529-aee6a7ef-c525-46f9-a823-9801103e101f?action=share&source=collection_link&creator=49420529"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "1. Admin login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"dang nhap 201\", () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set(\"tokenAdmin\", pm.response.json().accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "{{INTERNAL_API_KEY}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":  \"{{ADMIN_EMAIL}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/passwordless-login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"passwordless-login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Login no key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"thieu khoa 401\", () => pm.response.to.have.status(401));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "{{INTERNAL_API_KEY}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":  \"{{ADMIN_EMAIL}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/passwordless-login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"passwordless-login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Login wrong key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"thieu khoa 401\", () => pm.response.to.have.status(401));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "random",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":  \"{{ADMIN_EMAIL}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/passwordless-login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"passwordless-login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Me no token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"khong token 401\", () => pm.response.to.have.status(401));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "random",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/me",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Me admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"la admin\", () => pm.expect(pm.response.json().laAdmin).to.be.true);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "random",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/me",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6a. Login ngoài",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"201\", () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set(\"tokenNgoai\", pm.response.json().accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "{{INTERNAL_API_KEY}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"lamnguyennhattuong2005@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/passwordless-login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"passwordless-login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6b. Me ngoafi",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"khong phai admin\", () => pm.expect(pm.response.json().laAdmin).to.be.false);",
+									"pm.collectionVariables.set(\"idNgoai\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenNgoai}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "random",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/me",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6c. Login trưởng",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"201\", () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set(\"tokenTruong\", pm.response.json().accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "{{INTERNAL_API_KEY}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"truong@test.local\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/passwordless-login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"passwordless-login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6d. Me truong",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"khong phai admin\", () => pm.expect(pm.response.json().laAdmin).to.be.false);",
+									"pm.collectionVariables.set(\"idTruong\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenTruong}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "random",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/me",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6e. Login pho",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"201\", () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set(\"tokenPho\", pm.response.json().accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "{{INTERNAL_API_KEY}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"pho@test.local\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/passwordless-login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"passwordless-login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6f. Me pho",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"khong phai admin\", () => pm.expect(pm.response.json().laAdmin).to.be.false);",
+									"pm.collectionVariables.set(\"idPho\", pm.response.json().id); "
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenPho}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "random",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/me",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6g. Login tv",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"201\", () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set(\"tokenTv\", pm.response.json().accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "{{INTERNAL_API_KEY}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"tv@test.local\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/passwordless-login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"passwordless-login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6f. Me pho Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"khong phai admin\", () => pm.expect(pm.response.json().laAdmin).to.be.false);",
+									"pm.collectionVariables.set(\"idTv\", pm.response.json().id); "
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenTv}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-internal-key",
+								"value": "random",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/me",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Bộ phận",
+			"item": [
+				{
+					"name": "7. get Bo phan tree",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"const bgh = pm.response.json().find(b => b.loai === \"BAN_GIAM_HIEU\");",
+									"if (bgh) { pm.collectionVariables.set(\"idBgh\", bgh.id); } else { pm.collectionVariables.unset(\"idBgh\"); }"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "8. create Ban giam hieu",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"if (pm.collectionVariables.get(\"idBgh\")) {",
+									"     pm.execution.skipRequest(); ",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"tao BGH 201\", () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set(\"idBgh\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ma\":\"BGH\",\n    \"ten\":\"Ban Giám hiệu\",\n    \"loai\":\"BAN_GIAM_HIEU\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "9. create Ban giam hieu Copy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"trung BGH 400\", () => pm.response.to.have.status(400));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ma\":\"BGH\",\n    \"ten\":\"Ban Giám hiệu\",\n    \"loai\":\"BAN_GIAM_HIEU\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "10. tao Khoa",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"tao Khoa 201\", () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set(\"idKhoa\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"maKhoa\", \"KHOA\" + Date.now());"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ma\":\"{{maKhoa}}\",\n    \"ten\":\"Khoa Test\",\n    \"loai\":\"KHOA\",\n    \"boPhanChaId\":\"{{idBgh}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "11. Create Khoa overlapping",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"trung ma 409\", () => pm.response.to.have.status(409));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ma\":\"{{maKhoa}}\",\n    \"ten\":\"Khoa Test\",\n    \"loai\":\"KHOA\",\n    \"boPhanChaId\":\"{{idBgh}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "12. Create Bo mon",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"maBoMon\", \"BM\" + Date.now());"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"tao Bo mon 201\", () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set(\"idBoMon\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ma\":\"{{maBoMon}}\",\n    \"ten\":\"Bo mon Test\",\n    \"loai\":\"BO_MON\",\n    \"boPhanChaId\":\"{{idKhoa}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "13. Create Khoa under Bo mon",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Khoa duoi Bo mon 400\", () => pm.response.to.have.status(400));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"maKhoaSai\", \"KS\" + Date.now());"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ma\":\"{{maKhoaSai}}\",\n    \"ten\":\"Khoa Sai\",\n    \"loai\":\"KHOA\",\n    \"boPhanChaId\":\"{{idBoMon}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "14. Đổi Khoa từ cha xuống thành con của Bộ phận",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"doi cha sai 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"sai loai cha\", () => pm.expect(pm.response.json().message).to.include(\"không thể nằm dưới\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"boPhanChaId\":\"{{idBoMon}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "15. Sua bo phan ngoai",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"nguoi ngoai 403\", () => pm.response.to.have.status(403));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"maKhoa\", \"KHOA\" + Date.now());"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenNgoai}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ma\":\"{{maKhoa}}\",\n    \"ten\":\"Khoa Test\",\n    \"loai\":\"KHOA\",\n    \"boPhanChaId\":\"{{idBgh}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "16. sửa bộ phận bằng người ngoài",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"nguoi ngoai 403\", () => pm.response.to.have.status(403));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenNgoai}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ten\":\"Doi ten\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Thành viên bộ phận",
+			"item": [
+				{
+					"name": "17. Vai tro co the gan",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"3 vai tro cho Khoa\", () => pm.expect(pm.response.json().length).to.eql(3));",
+									"pm.collectionVariables.set(\"vtTruong\", pm.response.json().find(v => v.capBac === \"TRUONG\").id);",
+									"pm.collectionVariables.set(\"vtPho\", pm.response.json().find(v => v.capBac === \"PHO\").id);",
+									"pm.collectionVariables.set(\"vtTv\", pm.response.json().find(v => v.capBac === \"THANH_VIEN\").id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/vai-tro-co-the-gan",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"vai-tro-co-the-gan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "18. thiếu lãnh đạo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"",
+									"const k = pm.response.json().danhSachBoPhanThieu.find(b => b.id === pm.collectionVariables.get(\"idKhoa\"));",
+									"",
+									"pm.test(\"Khoa thieu Truong va Pho\", () => { pm.expect(k.thieuTruong).to.be.true; pm.expect(k.thieuPho).to.be.true; });"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/thieu-lanh-dao",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"thieu-lanh-dao"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "19. Gán trưởng khoa",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"gan Truong 201\", () => pm.response.to.have.status(201));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nguoiDungId\":\"{{idTruong}}\",\n    \"vaiTroId\":\"{{vtTruong}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "20. Gán trưởng khoa lần 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"truong thu 2 bi 400\", () => pm.response.to.have.status(400));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nguoiDungId\":\"{{idTruong}}\",\n    \"vaiTroId\":\"{{vtTruong}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "21. Gán phó khoa",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"gan Pho 201\", () => pm.response.to.have.status(201));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nguoiDungId\":\"{{idPho}}\",\n    \"vaiTroId\":\"{{vtPho}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "22a. lấy danh ds vai trò của Phòng",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"const j = pm.response.json(); const ds = j.dsVaiTro ?? j;",
+									"pm.collectionVariables.set(\"vtTruongPhong\", ds.find(v => v.ma === \"TRUONG_PHONG\").id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro?loaiBoPhan=PHONG",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro"
+							],
+							"query": [
+								{
+									"key": "loaiBoPhan",
+									"value": "PHONG"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "22b. Gán trưởng phòng vào khoa",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"sai loai bo phan bi 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"sai loai\", () => pm.expect(pm.response.json().message).to.include(\"không phù hợp\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nguoiDungId\":\"{{idNgoai}}\",\n    \"vaiTroId\":\"{{vtTruongPhong}}\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "23. Gán lại người đang là trưởng",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"da la truong bi 400\", () => pm.response.to.have.status(400));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nguoiDungId\":\"{{idTruong}}\",\n    \"vaiTroId\":\"{{vtTruong}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "24. Gán thành viên",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(201));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nguoiDungId\":\"{{idTv}}\",\n    \"vaiTroId\":\"{{vtTv}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "25. Thiếu lãnh đạo (sau khi đủ trưởng và phó)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Khoa khong con thieu\", () => pm.expect(pm.response.json().danhSachBoPhanThieu.some(b => b.id === pm.collectionVariables.get(\"idKhoa\"))).to.be.false);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/thieu-lanh-dao",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"thieu-lanh-dao"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "26a. Người ngoài thành viên",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403\", () => pm.response.to.have.status(403));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenNgoai}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nguoiDungId\":\"{{idNgoai}}\",\n    \"vaiTroId\":\"{{vtTv}}\"\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "26b. Trưởng gán thành viên",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403\", () => pm.response.to.have.status(403));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenTruong}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nguoiDungId\":\"{{idNgoai}}\",\n    \"vaiTroId\":\"{{vtTv}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "27. ds thành viên",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"3 nguoi\", () => pm.expect(pm.response.json().length).to.eql(3));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "28. đổi giảng viên thành phó",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Pho 1/1\", () => pm.expect(pm.response.json().message).to.include(\"1/1\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"vaiTroId\":\"{{vtPho}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien/{{idTv}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien",
+								"{{idTv}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "29. kết thúc phó",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien/{{idPho}}/ket-thuc",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien",
+								"{{idPho}}",
+								"ket-thuc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "30. kết thúc phó lần 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"da nghi\", () => pm.expect(pm.response.json().message).to.include(\"không còn làm\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien/{{idPho}}/ket-thuc",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien",
+								"{{idPho}}",
+								"ket-thuc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "31. Kết thúc ngày tương lai",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"tuong lai\", () => pm.expect(pm.response.json().message).to.include(\"tương lai\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ngayKetThuc\":\"2999-01-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien/{{idTv}}/ket-thuc",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien",
+								"{{idTv}}",
+								"ket-thuc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "32. Thiếu lãnh đạo (phó nghỉ)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const k = pm.response.json().danhSachBoPhanThieu.find(b => b.id === pm.collectionVariables.get(\"idKhoa\"));",
+									"pm.test(\"chi thieu Pho\", () => { pm.expect(k.thieuPho).to.be.true; pm.expect(k.thieuTruong).to.be.false; });"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/thieu-lanh-dao",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"thieu-lanh-dao"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "33. Gán lại phó",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"gan Pho 201\", () => pm.response.to.have.status(201));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nguoiDungId\":\"{{idPho}}\",\n    \"vaiTroId\":\"{{vtPho}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/thanh-vien",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"thanh-vien"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "34. Thiếu lãnh đạo (đã gán lại pohs)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Khoa khong con thieu\", () => pm.expect(pm.response.json().danhSachBoPhanThieu.some(b => b.id === pm.collectionVariables.get(\"idKhoa\"))).to.be.false);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/thieu-lanh-dao",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"thieu-lanh-dao"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Quyền hạn - Vai trò",
+			"item": [
+				{
+					"name": "35. Danh sách quyền hạn",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"co quyen\", () => pm.expect(pm.response.text()).to.include(\"bo_phan.tao\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/quyen-han",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"quyen-han"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "36. Quyền hạn người ngoài",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403\", () => pm.response.to.have.status(403));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenNgoai}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/quyen-han",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"quyen-han"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "37. Danh sách vai trò",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"co vai tro\", () => pm.expect(pm.response.json().count).to.be.above(0));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "38. Vai trò người ngoài",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403\", () => pm.response.to.have.status(403));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenNgoai}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "39. Chi tiết Vai trò của khoa",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const j = pm.response.json();",
+									"pm.test(\"ma dung\", () => pm.expect(j.ma).to.eql(\"TRUONG_KHOA\"));",
+									"pm.test(\"co quyen\", () => pm.expect(j.quyenHan.length).to.be.above(0));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro/{{vtTruong}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro",
+								"{{vtTruong}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "40. Vai trò không tồn tại",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404\", () => pm.response.to.have.status(404));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "41. Lấy Vai trò Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const ds = pm.response.json().dsVaiTro;",
+									"pm.collectionVariables.set(\"idVtAdmin\", ds.find(v => v.ma === \"ADMIN\").id);",
+									"pm.test(\"200\", () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro?phamVi=HE_THONG",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro"
+							],
+							"query": [
+								{
+									"key": "phamVi",
+									"value": "HE_THONG"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "42. Sao chép vai trò vào Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400\", () => pm.response.to.have.status(400));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tuVaiTroId\":\"{{vtTruong}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro/{{idVtAdmin}}/sao-chep-quyen",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro",
+								"{{idVtAdmin}}",
+								"sao-chep-quyen"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "43. Sao chép cùng vai trò",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"cung vai tro\", () => pm.expect(pm.response.json().message).to.include(\"cùng một vai trò\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tuVaiTroId\":\"{{vtPho}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro/{{vtPho}}/sao-chep-quyen",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro",
+								"{{vtPho}}",
+								"sao-chep-quyen"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "44. Sao chép vaiTroId sai định dạng",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400\", () => pm.response.to.have.status(400));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tuVaiTroId\":\"abc\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro/{{vtPho}}/sao-chep-quyen",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro",
+								"{{vtPho}}",
+								"sao-chep-quyen"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "45. Sao chép Token ngoài",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403\", () => pm.response.to.have.status(403));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tokenNgoai}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro/{{vtPho}}/sao-chep-quyen",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro",
+								"{{vtPho}}",
+								"sao-chep-quyen"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "46. Lấy vai trò bộ môn",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"vtPhoBoMon\", pm.response.json().dsVaiTro.find(v => v.ma === \"PHO_BO_MON\").id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro?loaiBoPhan=BO_MON",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro"
+							],
+							"query": [
+								{
+									"key": "loaiBoPhan",
+									"value": "BO_MON"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "47. Sao chép phó bộ môn sang phó khoa",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"if (!pm.environment.get(\"chayThatSu\")) { pm.execution.skipRequest(); }"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.expect(pm.response.json().quyenHan.length).to.be.above(0);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tuVaiTroId\":\"{{vtPhoBoMon}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/vai-tro/{{vtPho}}/sao-chep-quyen",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"vai-tro",
+								"{{vtPho}}",
+								"sao-chep-quyen"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dọn dẹp",
+			"item": [
+				{
+					"name": "48. Ngưng khoa khi còn bộ môn",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"con dang hoat dong\", () => pm.expect(pm.response.json().message).to.include(\"bộ phận con\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ngungHoatDong\":true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/ngung-hoat-dong",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"ngung-hoat-dong"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "49. Ngưng bộ môn",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"da ngung\", () => pm.expect(pm.response.json().ngungHoatDong).to.be.true);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ngungHoatDong\":true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idBoMon}}/ngung-hoat-dong",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idBoMon}}",
+								"ngung-hoat-dong"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "50. Gán thành viên vào bộ môn đã ngừng",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400\", () => pm.response.to.have.status(400));",
+									"pm.expect(pm.response.json().message).to.include(\"ngưng hoạt động\")",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nguoiDungId\":\"{{idNgoai}}\",\n    \"vaiTroId\":\"{{vtTv}}\"\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idBoMon}}/thanh-vien",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idBoMon}}",
+								"thanh-vien"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "51. Ngưng khoa",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ngungHoatDong\":true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idKhoa}}/ngung-hoat-dong",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idKhoa}}",
+								"ngung-hoat-dong"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "52. Mở lại bộ môn khi khóa đã ngừng",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400\", () => pm.response.to.have.status(400));",
+									"pm.expect(pm.response.json().message).to.include(\"bộ phận cha\")"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ngungHoatDong\":false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan/{{idBoMon}}/ngung-hoat-dong",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan",
+								"{{idBoMon}}",
+								"ngung-hoat-dong"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "53. Cây bộ phận không còn khóa test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Khoa Test da bien mat\", () => pm.expect(pm.response.text()).to.not.include(pm.collectionVariables.get(\"idKhoa\")));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/bo-phan",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"bo-phan"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{tokenAdmin}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "tokenAdmin",
+			"value": ""
+		},
+		{
+			"key": "idBgh",
+			"value": ""
+		},
+		{
+			"key": "maKhoa",
+			"value": ""
+		},
+		{
+			"key": "idKhoa",
+			"value": ""
+		},
+		{
+			"key": "maBoMon",
+			"value": ""
+		},
+		{
+			"key": "idBoMon",
+			"value": ""
+		},
+		{
+			"key": "maKhoaSai",
+			"value": ""
+		},
+		{
+			"key": "tokenNgoai",
+			"value": ""
+		},
+		{
+			"key": "idNgoai",
+			"value": ""
+		},
+		{
+			"key": "tokenTruong",
+			"value": ""
+		},
+		{
+			"key": "idTruong",
+			"value": ""
+		},
+		{
+			"key": "tokenPho",
+			"value": ""
+		},
+		{
+			"key": "idPho",
+			"value": ""
+		},
+		{
+			"key": "tokenTv",
+			"value": ""
+		},
+		{
+			"key": "idTv",
+			"value": ""
+		},
+		{
+			"key": "vtTruong",
+			"value": ""
+		},
+		{
+			"key": "vtPho",
+			"value": ""
+		},
+		{
+			"key": "vtTv",
+			"value": ""
+		},
+		{
+			"key": "vtTruongPhong",
+			"value": ""
+		},
+		{
+			"key": "idVtAdmin",
+			"value": ""
+		},
+		{
+			"key": "vtPhoBoMon",
+			"value": ""
+		}
+	]
+}
