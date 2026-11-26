@@ -13,6 +13,8 @@ import { QuyenBoPhanGuard } from './permission/guards/permission-bo-phan.guard.j
 import { QuyenHanModule } from './quyen-han/quyen-han.module.js';
 import { VaiTroModule } from './vai-tro/vai-tro.module.js';
 import { NguoiDungModule } from './nguoi-dung/nguoi-dung.module.js';
+import { ExcelModule } from './excel/excel.module.js';
+import { NhapExcelModule } from './nhap-excel/nhap-excel.module.js';
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { NguoiDungModule } from './nguoi-dung/nguoi-dung.module.js';
     AuthModule,
     BoPhanModule,
     ThanhVienBoPhanModule,    
-    PermissionModule, QuyenHanModule, VaiTroModule, NguoiDungModule,
+    PermissionModule, QuyenHanModule, VaiTroModule, NguoiDungModule, ExcelModule, NhapExcelModule,
   ],
 
   controllers: [AppController],
