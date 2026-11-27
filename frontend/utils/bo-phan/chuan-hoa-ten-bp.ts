@@ -1,4 +1,4 @@
-import { LoaiBoPhan, TEN_LOAI_BO_PHAN } from "@/features/boPhan/type/boPhan.type";
+import { LoaiBoPhan, TEN_LOAI_BO_PHAN } from "@/features/bo-phan/type/boPhan.type";
 import { boDau } from "../xu-ly-chuoi";
 
 export const ChuanHoaTenBp = (ten:string, loai: string): string => {

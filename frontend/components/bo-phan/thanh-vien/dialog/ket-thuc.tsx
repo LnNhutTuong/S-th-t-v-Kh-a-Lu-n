@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { TenCapBac, type thanhVienBoPhanType } from "@/features/boPhan/type/boPhan.type";
+import { TenCapBac, type thanhVienBoPhanType } from "@/features/bo-phan/type/boPhan.type";
 import { useCapNhatNgayKetThuc } from "@/hooks/use-bo-phan";
 import { useState } from "react";
 

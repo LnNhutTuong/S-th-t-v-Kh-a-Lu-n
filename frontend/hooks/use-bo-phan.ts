@@ -1,6 +1,6 @@
 import { boPhanApi } from "@/services/bo-phan.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { themThanhVienBody, SuaThanhVienBody, CapNhatNgayKetThucBody, taoBoPhanBody, suaBoPhanBody, ngungHoatDongBody } from "@/features/boPhan/type/boPhan.type";
+import { themThanhVienBody, SuaThanhVienBody, CapNhatNgayKetThucBody, taoBoPhanBody, suaBoPhanBody, ngungHoatDongBody } from "@/features/bo-phan/type/boPhan.type";
 import { toast } from "sonner";
 import { layThongBaoLoi } from "@/utils/lay-thong-bao";
 

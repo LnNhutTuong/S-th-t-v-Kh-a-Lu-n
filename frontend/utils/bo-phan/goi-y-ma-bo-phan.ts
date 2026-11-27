@@ -1,4 +1,4 @@
-import { LoaiBoPhan, TEN_LOAI_BO_PHAN, TIEN_TO_MA } from "@/features/boPhan/type/boPhan.type";
+import { LoaiBoPhan, TEN_LOAI_BO_PHAN, TIEN_TO_MA } from "@/features/bo-phan/type/boPhan.type";
 import { boDau } from "../xu-ly-chuoi";
 export const goiYMaBoPhan = (ten: string, loai: LoaiBoPhan | "", cacMaDaCo: Set<string>): string => {
     const tenBp = ten.trim();

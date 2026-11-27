@@ -5,12 +5,15 @@ import BoPhanChiTiet from "./thong-tin-chung/bo-phan-chi-tiet"
 import  BoPhanThanhVien  from "./thanh-vien/bo-phan-thanh-vien";
 import DialogBoPhan from "./thong-tin-chung/dialog/dialog-bo-phan";
 import DialogNgungHoatDong from "./thong-tin-chung/dialog/ngung-hoat-dong";
-import type { boPhanType } from "@/features/boPhan/type/boPhan.type";
+import type { boPhanType } from "@/features/bo-phan/type/boPhan.type";
+import DialogNhapExcel from "@/components/nhap-excel/dialog-nhap-excel";
+import { LoaiNhapExcel } from "@/features/nhap-excel/type/nhap-excel.type";
 
 export default function QuanLyBoPhan(){
     
     const [boPhanDangChon, setBoPhanDangChon] = useState<string | null>(null);
     const [dialogMo, setDialogMo] = useState(false);
+    const [dialogNhapExcelMo, setDialogNhapExcelMo] = useState(false);
     const [boPhanDangSua, setBoPhanDangSua] = useState<boPhanType | null>(null);
     const [boPhanCapNhatTrangThai, setBoPhanCapNhatTrangThai] = useState<boPhanType | null>(null);
 
@@ -39,7 +42,7 @@ export default function QuanLyBoPhan(){
 
     return(
         <div className="flex h-full mx-4 my-2 rounded-xl border-1">
-            <BoPhanTree boPhanDangChon={boPhanDangChon} onChon={setBoPhanDangChon} onThem={themBoPhan}  />
+            <BoPhanTree boPhanDangChon={boPhanDangChon} onChon={setBoPhanDangChon} onThem={themBoPhan} onThemExcel={() => setDialogNhapExcelMo(true)} />
 
             {boPhanDangChon ? (
                 <div className="flex flex-col flex-1">
@@ -57,6 +60,7 @@ export default function QuanLyBoPhan(){
                 </section>
             }
             <DialogBoPhan open={dialogMo} onOpenChange={setDialogMo} boPhan={boPhanDangSua} boPhanChaMacDinh={chaMacDinh}/>
+            <DialogNhapExcel loai={LoaiNhapExcel.BO_PHAN} open={dialogNhapExcelMo} onOpenChange={setDialogNhapExcelMo} />
             <DialogNgungHoatDong boPhan={boPhanCapNhatTrangThai} onOpenChange={(open) => {
                 if (!open) setBoPhanCapNhatTrangThai(null);
             }} />

@@ -1,7 +1,7 @@
 "use client"
 
-import { ThemThanhVienForm, themThanhVienSchema } from "@/features/boPhan/schema/them-thanh-vien.schema";
-import { ungVienType } from "@/features/boPhan/type/boPhan.type";
+import { ThemThanhVienForm, themThanhVienSchema } from "@/features/bo-phan/schema/them-thanh-vien.schema";
+import { ungVienType } from "@/features/bo-phan/type/boPhan.type";
 import { useThemThanhVien, useUngVien, useVaiTroCoTheGan } from "@/hooks/use-bo-phan";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "@/components/ui/button";

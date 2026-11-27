@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import type { boPhanType } from "@/features/boPhan/type/boPhan.type";
+import type { boPhanType } from "@/features/bo-phan/type/boPhan.type";
 import { useCapNhatTrangThai } from "@/hooks/use-bo-phan";
 
 type Props = { boPhan: boPhanType | null; onOpenChange: (open: boolean) => void }

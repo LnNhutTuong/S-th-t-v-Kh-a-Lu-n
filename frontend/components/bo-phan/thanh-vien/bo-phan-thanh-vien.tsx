@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { TenCapBac, type thanhVienBoPhanType } from "@/features/boPhan/type/boPhan.type";
+import { TenCapBac, type thanhVienBoPhanType } from "@/features/bo-phan/type/boPhan.type";
 import { useDsThanhVien } from "@/hooks/use-bo-phan";
 import { Ellipsis } from "lucide-react";
 import { useState } from "react";
