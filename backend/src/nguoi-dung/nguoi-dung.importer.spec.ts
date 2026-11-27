@@ -1,5 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { NguoiDungImporter } from './nguoi-dung.importer.js';
+
+beforeAll(() => {
+  process.env.ALLOWED_EMAIL_DOMAINS = 'agu.edu.vn';
+});
 
 const dsBoPhan = [
   { id: 'b1', ma: 'KHOA_CNTT', ten: 'Khoa Công nghệ thông tin', loai: 'KHOA', ngungHoatDong: false },

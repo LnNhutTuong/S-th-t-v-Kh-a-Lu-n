@@ -3,6 +3,7 @@ import { NhapExcelController } from './nhap-excel.controller.js';
 import { NhapExcelService } from './nhap-excel.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ExcelService } from '../excel/excel.service.js';
+import { PermissionService } from '../permission/permission.service.js';
 
 describe('NhapExcelController', () => {
   let controller: NhapExcelController;
@@ -14,6 +15,7 @@ describe('NhapExcelController', () => {
         NhapExcelService,
         { provide: PrismaService, useValue: {} },
         { provide: ExcelService, useValue: {} },
+        { provide: PermissionService, useValue: { checkAdmin: async () => true } },
       ],
     }).compile();
 
