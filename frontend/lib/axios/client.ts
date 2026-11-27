@@ -4,7 +4,7 @@ export const clientApi = axios.create({
   baseURL: "/api",          
   withCredentials: true,   
   timeout: 15000,
-  headers: { "Content-Type": "application/json" },
+
 });
 
 clientApi.interceptors.response.use(

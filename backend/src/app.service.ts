@@ -17,4 +17,6 @@ export class AppService {
       throw new ServiceUnavailableException('Database unavailable')
     }
   }
+
+  
 }

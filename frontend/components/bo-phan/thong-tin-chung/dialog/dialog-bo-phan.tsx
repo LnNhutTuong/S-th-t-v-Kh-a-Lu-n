@@ -1,7 +1,7 @@
 "use client";
 
-import { boPhanTreeType, boPhanType, CHA_HOP_LE, LoaiBoPhan, LoaiBpCanChonNhom, NhomDonVi, suaBoPhanBody, taoBoPhanBody, TEN_LOAI_BO_PHAN, TEN_NHOM_BO_PHAN } from "@/features/boPhan/type/boPhan.type";
-import { boPhanForm, boPhanSchema } from "@/features/boPhan/schema/bo-phan.schema";
+import { boPhanTreeType, boPhanType, CHA_HOP_LE, LoaiBoPhan, LoaiBpCanChonNhom, NhomDonVi, suaBoPhanBody, taoBoPhanBody, TEN_LOAI_BO_PHAN, TEN_NHOM_BO_PHAN } from "@/features/bo-phan/type/boPhan.type";
+import { boPhanForm, boPhanSchema } from "@/features/bo-phan/schema/bo-phan.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useEffect, useMemo, useRef } from "react";

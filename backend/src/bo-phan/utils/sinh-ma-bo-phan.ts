@@ -27,6 +27,21 @@ export const TIEN_TO_MA: Record<LoaiBoPhan, string> = {
   TRUONG: 'TRUONG',
 };
 
+// Viết hoa chữ cái đầu mỗi từ + gắn tiền tố loại (giống FE ChuanHoaTenBp)
+export const chuanHoaTenBp = (ten: string, loai: LoaiBoPhan): string => {
+  const tenGoc = ten.trim();
+  if (!tenGoc || loai === 'BAN_GIAM_HIEU') return tenGoc;
+
+  const tuGoc = tenGoc.split(/\s+/);
+  const tuLoai = TEN_LOAI_BO_PHAN[loai].split(' ');
+
+  const daCo = tuLoai.every((t, i) => tuGoc[i] !== undefined && boDau(tuGoc[i]) === boDau(t));
+  const conLai = daCo ? tuGoc.slice(tuLoai.length) : [...tuGoc];
+
+  const hoaMoiTu = conLai.map((t) => t.charAt(0).toUpperCase() + t.slice(1));
+  return [...tuLoai, ...hoaMoiTu].join(' ');
+};
+
 // Trả về '' nếu không sinh được (tên rỗng hoặc chỉ có mỗi từ chỉ loại)
 export const sinhMaBoPhan = (ten: string, loai: LoaiBoPhan, cacMaDaCo: Set<string>): string => {
   const tenBp = ten.trim();

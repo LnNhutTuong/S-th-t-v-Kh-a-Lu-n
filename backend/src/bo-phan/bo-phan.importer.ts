@@ -6,7 +6,7 @@ import type { CotExcel, DongExcel } from '../excel/type/excel.type.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { LoaiBoPhan, LoaiNhapExcel, NhomDonVi } from '../generated/prisma/enums.js';
 import { CHA_HOP_LE } from '../permission/constants/quyen-han.constants.js';
-import { boDau, sinhMaBoPhan, tinhNhom } from './utils/sinh-ma-bo-phan.js';
+import { boDau, chuanHoaTenBp, sinhMaBoPhan, tinhNhom } from './utils/sinh-ma-bo-phan.js';
 
 const DS_LOAI = Object.values(LoaiBoPhan) as string[];
 const DS_NHOM = Object.values(NhomDonVi) as string[];
@@ -231,7 +231,7 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
       const ten = this.chuoi(g['Tên']);
       const loai = this.chuoi(g['Loại']) as LoaiBoPhan;
       const maFile = this.chuoi(g['Mã']).toUpperCase();
-      const du = { ten, loai, nhom: tinhNhom(loai, null, this.chuoi(g['Nhóm']) || null) };
+      const du = { ten: chuanHoaTenBp(ten, loai), loai, nhom: tinhNhom(loai, null, this.chuoi(g['Nhóm']) || null) };
 
       const cu = this.timBoPhanCu(dsDb, maFile, loai, ten);
         

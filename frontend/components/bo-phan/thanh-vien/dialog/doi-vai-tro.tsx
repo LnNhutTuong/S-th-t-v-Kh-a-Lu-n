@@ -3,8 +3,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { doiVaiTroSchema, type doiVaiTroType } from "@/features/boPhan/schema/doi-vai-tro.schema";
-import type { thanhVienBoPhanType } from "@/features/boPhan/type/boPhan.type";
+import { doiVaiTroSchema, type doiVaiTroType } from "@/features/bo-phan/schema/doi-vai-tro.schema";
+import type { thanhVienBoPhanType } from "@/features/bo-phan/type/boPhan.type";
 import { useSuaThanhVien, useVaiTroCoTheGan } from "@/hooks/use-bo-phan";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";

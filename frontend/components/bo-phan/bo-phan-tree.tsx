@@ -5,13 +5,20 @@ import { useCayBoPhan, useThieuLanhDao } from "@/hooks/use-bo-phan";
 import { Skeleton } from "@/components/ui/skeleton";
 import {Alert} from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import {  
   type boPhanTreeType,
   type NhomDonVi as NhomDonViType,
   TEN_NHOM,
   THU_TU_NHOM,
   boPhanThieuLanhDaoType
-} from "@/features/boPhan/type/boPhan.type";
+} from "@/features/bo-phan/type/boPhan.type";
 
 
 type NhomNode = {
@@ -96,10 +103,10 @@ function TreeSkeleton() {
   );
 }
 
-type Props = { boPhanDangChon: string | null; onChon: (id: string) => void; onThem: () => void };
+type Props = { boPhanDangChon: string | null; onChon: (id: string) => void; onThem: () => void; onThemExcel: () => void };
 
 
-export default function BoPhanTree({boPhanDangChon, onChon, onThem }: Props) {
+export default function BoPhanTree({boPhanDangChon, onChon, onThem, onThemExcel }: Props) {
 
 
   const [baoGomDungHoatDong, setBaoGomDungHoatDong] = useState(false);
@@ -387,9 +394,21 @@ export default function BoPhanTree({boPhanDangChon, onChon, onThem }: Props) {
               </button>
             )}
           </div>
-          <Button type="button" size="sm" className="shrink-0" onClick={onThem}>
-            + Thêm bộ phận
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button type="button" size="sm" className="shrink-0" />}>
+              + Thêm bộ phận <ChevronDown aria-hidden="true" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60">
+              <DropdownMenuItem onClick={onThem} className="flex-col items-start gap-0.5 py-2">
+                <span>Thêm bộ phận thủ công</span>
+                <span className="text-xs text-muted-foreground">Nhập thông tin từng bộ phận</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onThemExcel} className="flex-col items-start gap-0.5 py-2">
+                <span>Thêm bộ phận bằng Excel</span>
+                <span className="text-xs text-muted-foreground">Tải biểu mẫu và nhập hàng loạt</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Tổng số đơn vị và bộ lọc trạng thái */}

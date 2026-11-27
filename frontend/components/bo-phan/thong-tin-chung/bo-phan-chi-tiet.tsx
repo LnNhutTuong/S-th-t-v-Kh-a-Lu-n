@@ -2,10 +2,10 @@ import { useBoPhan, useThieuLanhDao } from "@/hooks/use-bo-phan";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LoaiBoPhan, TEN_LOAI_BO_PHAN, TEN_NHOM_BO_PHAN, boPhanThieuLanhDaoType, boPhanType } from "@/features/boPhan/type/boPhan.type"
+import { LoaiBoPhan, TEN_LOAI_BO_PHAN, TEN_NHOM_BO_PHAN, boPhanThieuLanhDaoType, boPhanType } from "@/features/bo-phan/type/boPhan.type"
 import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
-import { CHA_HOP_LE } from "@/features/boPhan/type/boPhan.type";
+import { CHA_HOP_LE } from "@/features/bo-phan/type/boPhan.type";
 
 type Props = { boPhanId: string | null; onSua: (boPhan: boPhanType) => void, onNgungHoatDong: (boPhan: boPhanType) => void, onThemCon: (boPhanId: string) => void};
 

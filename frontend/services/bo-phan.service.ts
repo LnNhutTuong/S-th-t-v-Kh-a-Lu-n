@@ -1,4 +1,4 @@
-import { boPhanType, boPhanTreeType, thanhVienBoPhanType, thieuLanhDaoType, vaiTroCoTheGanType, ungVienType, themThanhVienBody, themThanhVienResponse, SuaThanhVienBody, SuaThanhVienResponse, CapNhatNgayKetThucBody, CapNhatNgayKetThuaResponse, taoBoPhanBody, taoBoPhanResponse, suaBoPhanBody, suaBoPhanResponse, ngungHoatDongBody, ngungHoatDongResponse } from "@/features/boPhan/type/boPhan.type";
+import { boPhanType, boPhanTreeType, thanhVienBoPhanType, thieuLanhDaoType, vaiTroCoTheGanType, ungVienType, themThanhVienBody, themThanhVienResponse, SuaThanhVienBody, SuaThanhVienResponse, CapNhatNgayKetThucBody, CapNhatNgayKetThuaResponse, taoBoPhanBody, taoBoPhanResponse, suaBoPhanBody, suaBoPhanResponse, ngungHoatDongBody, ngungHoatDongResponse } from "@/features/bo-phan/type/boPhan.type";
 import { clientApi } from "@/lib/axios/client";
 
 export const boPhanApi = {
