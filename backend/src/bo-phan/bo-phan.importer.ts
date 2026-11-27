@@ -44,8 +44,12 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
       ghiChu: 'Nhập Tên hoặc Mã của bộ phận cha. Để trống nếu là Ban giám hiệu',
       viDu: 'Ban giám hiệu',
     },
-    { tieuDe: 'Nhóm', khoa: 'nhom', danhSach: DS_NHOM, ghiChu: 'Chỉ cần với Viện, Trung tâm, Trường. Loại khác tự suy ra' },
-    { tieuDe: 'Mã', khoa: 'ma', ghiChu: 'Để trống thì tự sinh từ Tên và Loại. Điền nếu muốn tự đặt mã' },
+    { tieuDe: 'Nhóm', khoa: 'nhom', 
+      danhSach: DS_NHOM, 
+      ghiChu: 'Chỉ cần với loại: Viện, Trung tâm, Trường. Loại khác tự suy ra' },
+    { tieuDe: 'Mã', 
+      khoa: 'ma', 
+      ghiChu: 'Để trống thì tự sinh từ Tên và Loại. Điền nếu muốn tự đặt mã' },
   ];
 
   onModuleInit() {
@@ -210,6 +214,12 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
     return loi;
   }
 
+  private timBoPhanCu<T extends { ma: string; ten: string; loai: string }>(ds: T[], maFile: string, loai: string, ten: string): T | undefined{
+    return maFile
+        ? ds.find((b) => b.ma.toUpperCase() === maFile)
+        : ds.find((b) => b.loai === loai && boDau(b.ten) === boDau(ten));
+  }
+
   async ghi(cacDong: DongExcel[], tx: Prisma.TransactionClient): Promise<void> {
     const dsDb = await tx.boPhan.findMany({ select: { id: true, ma: true, ten: true, loai: true } });
     const maDaDung = new Set(dsDb.map((b) => b.ma));
@@ -223,10 +233,8 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
       const maFile = this.chuoi(g['Mã']).toUpperCase();
       const du = { ten, loai, nhom: tinhNhom(loai, null, this.chuoi(g['Nhóm']) || null) };
 
-      const cu = maFile
-        ? dsDb.find((b) => b.ma.toUpperCase() === maFile)
-        : dsDb.find((b) => b.loai === loai && boDau(b.ten) === boDau(ten));
-
+      const cu = this.timBoPhanCu(dsDb, maFile, loai, ten);
+        
       if (cu) {
         await tx.boPhan.update({ where: { id: cu.id }, data: du });
         idCuaDong.set(d.dong, cu.id);
@@ -270,4 +278,47 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
       });
     }
   }
+
+  async suyRa(cacDong: DongExcel[]): Promise<Map<number, Record<string, unknown>>>{
+    const ds = await this.prisma.boPhan.findMany({ select: { ma: true, ten: true, loai: true } });
+    const maDaDung = new Set(ds.map((b) => b.ma));
+    const ketQua = new Map<number, Record<string, unknown>>();
+
+    for(const d of cacDong){
+      const ten = this.chuoi(d.giaTri['Tên']);
+      const loai = this.chuoi(d.giaTri['Loại']);
+      const maFile = this.chuoi(d.giaTri['Mã']).toUpperCase();
+      const nhomGui = this.chuoi(d.giaTri['Nhóm']);
+
+      const cu = this.timBoPhanCu(ds, maFile, loai, ten);
+
+      const them: Record<string, unknown> = {};
+
+      if(!maFile){
+        const ma = cu?.ma ?? sinhMaBoPhan(ten, loai as LoaiBoPhan, maDaDung);
+        maDaDung.add(ma);
+        them['Mã'] = ma;
+      }else { 
+        maDaDung.add(maFile); 
+      }
+
+      if(!nhomGui){
+        const nhom = tinhNhom(loai as LoaiBoPhan, null, null);
+
+        if(nhom !== null){
+          them['Nhóm'] = nhom
+        }
+      }
+
+      if (Object.keys(them).length > 0){
+        ketQua.set(d.dong, them);
+      }
+
+    }
+
+    return ketQua;
+
+  }
+
+  
 }
