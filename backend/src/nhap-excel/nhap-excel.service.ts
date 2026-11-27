@@ -18,12 +18,26 @@ export class NhapExcelService {
     this.importers.set(importer.loai, importer);
   }
 
-  private layImporter(loai: LoaiNhapExcel): ImporterExcel {
-    const importer = this.importers.get(loai);
+  KiemTraLoai(loai: string): LoaiNhapExcel{
+    if(!Object.values(LoaiNhapExcel).includes(loai as LoaiNhapExcel)){
+      throw new BadRequestException("Loại nhập không hợp lệ");
+    }
+    return loai as LoaiNhapExcel;
+  } 
+
+  private layImporter(loai: string): ImporterExcel {
+    const loaiNhapExcel = this.KiemTraLoai(loai);
+    const importer = this.importers.get(loaiNhapExcel);
     if (!importer){
       throw new BadRequestException('Chưa hỗ trợ nhập loại này');
     }
     return importer;
+  }
+
+  async layMau(loai: LoaiNhapExcel){    
+    const importer = this.layImporter(loai);
+    const buffer = await this.excel.CreateTemplate(importer.cot);
+    return { tenFile: `mau-nhap-${loai.toLowerCase().replace(/_/g, '-')}.xlsx`, buffer };
   }
 
   async XemTruoc(loai: LoaiNhapExcel, nguoiTaoId: string, tenFile: string, buffer: Buffer) {
@@ -81,6 +95,13 @@ export class NhapExcelService {
       loi.push(...(await importer.kiemTraCaFile(cacDong)));
     }
 
+    //xem truoc Ma, Nhom
+    let duLieu: DongExcel[] = cacDong;
+    if (loi.length === 0 && importer.suyRa) {
+      const suyRa = await importer.suyRa(cacDong);
+      duLieu = cacDong.map((d) => ({ ...d, suyRa: suyRa.get(d.dong) }));
+    }
+
     const tomTat = { tongDong: cacDong.length, soLoi: loi.length, soTaoMoi, soCapNhat };
 
     return this.prisma.phienNhapExcel.create({
@@ -89,7 +110,7 @@ export class NhapExcelService {
         nguoiTaoId,
         tenFile,
         trangThai: loi.length > 0 ? 'LOI' : 'XEM_TRUOC',
-        duLieuXemTruoc: cacDong as any,
+        duLieuXemTruoc: duLieu as any,
         loi: loi as any,
         tomTat,
         hetHanLuc: new Date(Date.now() + 30 * 60 * 1000),
@@ -109,7 +130,7 @@ export class NhapExcelService {
     }
 
     if(phien.nguoiTaoId !== nguoiId){
-      throw new BadRequestException("Không phải phiên nhập của bạn");
+      throw new ForbiddenException("Không phải phiên nhập của bạn");
     }
 
     if(phien.trangThai === 'LOI'){

@@ -9,7 +9,8 @@ export interface CotExcel {
 
 export interface DongExcel { 
     dong: number; 
-    giaTri: Record<string, unknown>
+    giaTri: Record<string, unknown>;
+    suyRa?: Record<string, unknown>;
 };
 
 export interface SheetExcel { 

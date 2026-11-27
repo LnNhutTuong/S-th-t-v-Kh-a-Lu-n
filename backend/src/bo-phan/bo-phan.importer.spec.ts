@@ -78,4 +78,27 @@ describe('BoPhanImporter', () => {
     expect(importer.layKhoa(dong(2, hang('Khoa A', 'KHOA', 'x', 'ka')))).toBe('ma:ka');
     expect(importer.layKhoa(dong(2, hang('Phòng Đào tạo', 'PHONG', 'x')))).toBe('ten:phong|phong dao tao');
   });
+
+  it('suyRa: DB rỗng, tự sinh Mã và suy ra Nhóm cho KHOA và BO_MON', async () => {
+    const imp = new BoPhanImporter({ boPhan: { findMany: async () => [] } } as any, { DangKy() {} } as any);
+    const kq = await imp.suyRa([
+      dong(2, hang('Khoa Sư phạm', 'KHOA', 'Ban giám hiệu')),
+      dong(3, hang('Bộ môn Sư phạm Toán', 'BO_MON', 'Khoa Sư phạm')),
+    ]);
+    expect(kq.get(2)).toEqual({ Mã: 'KHOA_SP', Nhóm: 'DAO_TAO' });
+    expect(kq.get(3)).toEqual({ Mã: 'BM_SPT', Nhóm: 'DAO_TAO' });
+  });
+
+  it('suyRa: đã có KHOA_SP trong DB và dòng Khoa Sư phạm không điền Mã thì giữ KHOA_SP (cập nhật)', async () => {
+    const imp = new BoPhanImporter(
+      {
+        boPhan: {
+          findMany: async () => [{ ma: 'KHOA_SP', ten: 'Khoa Sư phạm', loai: 'KHOA' }],
+        },
+      } as any,
+      { DangKy() {} } as any,
+    );
+    const kq = await imp.suyRa([dong(2, hang('Khoa Sư phạm', 'KHOA', 'Ban giám hiệu'))]);
+    expect(kq.get(2)).toEqual({ Mã: 'KHOA_SP', Nhóm: 'DAO_TAO' });
+  });
 });

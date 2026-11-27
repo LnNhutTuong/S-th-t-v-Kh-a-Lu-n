@@ -63,7 +63,12 @@ export class ExcelService {
 
   async ReadFile(buffer: Buffer, tenSheet?: string): Promise<DongExcel[]> {
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buffer as any);
+    try{
+      await wb.xlsx.load(buffer as any);
+    }catch(e){
+      throw new BadRequestException('Không đọc được file, hãy dùng file .xlsx tải từ hệ thống');
+    }
+    
 
     const ws = tenSheet ? wb.getWorksheet(tenSheet) : wb.worksheets[0];
     if (!ws) {

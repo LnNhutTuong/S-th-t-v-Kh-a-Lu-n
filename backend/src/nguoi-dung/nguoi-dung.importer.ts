@@ -7,7 +7,7 @@ import type { Prisma } from '../generated/prisma/client.js';
 import { LoaiNhapExcel, PhamViVaiTro } from '../generated/prisma/enums.js';
 import type { CapBac } from '../generated/prisma/enums.js';
 import { boDau } from '../bo-phan/utils/sinh-ma-bo-phan.js';
-
+import { getAllowedDomains } from '../utils/regex/email.regex.js';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface BoPhanLite {
@@ -39,18 +39,39 @@ export class NguoiDungImporter implements ImporterExcel, OnModuleInit {
   cotKhoa = 'Email'; // cột báo lỗi khi trùng khóa
 
   cot: CotExcel[] = [
-    { tieuDe: 'Email', khoa: 'email', doRong: 30, ghiChu: 'Email đăng nhập. Là khóa để nhập lại, cùng email thì cập nhật', viDu: 'nva@agu.edu.vn' },
-    { tieuDe: 'Tên', khoa: 'ten', doRong: 25, ghiChu: 'Bắt buộc với người mới', viDu: 'Nguyễn Văn A' },
-    { tieuDe: 'Ngày sinh', khoa: 'ngaySinh', ghiChu: 'Không bắt buộc. Dạng dd/mm/yyyy', viDu: '15/08/1990' },
+    { tieuDe: 'Email', 
+      khoa: 'email', 
+      doRong: 30, 
+      ghiChu: 'Email đăng nhập. Là khóa để nhập lại, cùng email thì cập nhật. Bắt buộc email AGU cung cấp', 
+      viDu: 'nva@agu.edu.vn' },
+
+    { tieuDe: 'Tên', 
+      khoa: 'ten', 
+      doRong: 25, 
+      ghiChu: 'Bắt buộc với người mới', 
+      viDu: 'Nguyễn Văn A' },
+      
+    { tieuDe: 'Ngày sinh', 
+      khoa: 'ngaySinh', 
+      ghiChu: 'Không bắt buộc. Dạng dd/mm/yyyy', 
+      viDu: '15/08/1990' },
+
     {
       tieuDe: 'Bộ phận',
       khoa: 'boPhan',
       doRong: 30,
-      ghiChu: 'Tên hoặc Mã bộ phận. Để trống nếu chỉ tạo tài khoản, chưa gán bộ phận',
+      ghiChu: 'Tên hoặc Mã bộ phận. Để trống nếu chỉ tạo tài khoản, chưa gán bộ phận. Ví dụ: Khoa + Công Nghệ Thông Tin',
       viDu: 'Khoa Công nghệ thông tin',
     },
-    { tieuDe: 'Vai trò', khoa: 'vaiTro', ghiChu: 'Chức vụ tại bộ phận, ví dụ Trưởng khoa, Giảng viên. Bắt buộc nếu có Bộ phận', viDu: 'Giảng viên' },
-    { tieuDe: 'Ngày tham gia', khoa: 'ngayThamGia', ghiChu: 'Không bắt buộc, để trống là hôm nay. Dạng dd/mm/yyyy' },
+
+    { tieuDe: 'Vai trò',
+      khoa: 'vaiTro', 
+      ghiChu: 'Chức vụ tại bộ phận, ví dụ Trưởng khoa, Giảng viên. Bắt buộc nếu có Bộ phận', 
+      viDu: 'Giảng viên' },
+
+    { tieuDe: 'Ngày tham gia', 
+      khoa: 'ngayThamGia', 
+      ghiChu: 'Không bắt buộc, để trống là hôm nay. Dạng dd/mm/yyyy' },
   ];
 
   onModuleInit() {
@@ -102,12 +123,19 @@ export class NguoiDungImporter implements ImporterExcel, OnModuleInit {
     const them = (cot: string, thongBao: string) => loi.push({ dong: d.dong, cot, thongBao });
     const g = d.giaTri;
 
-    const email = this.chuoi(g['Email']);
+    const email = this.chuoi(g['Email']).toLowerCase();
     const boPhan = this.chuoi(g['Bộ phận']);
     const vaiTro = this.chuoi(g['Vai trò']);
 
-    if (!email) them('Email', 'Email không được để trống');
+    const domain = email?.split('@').pop();
+
+    if (!email){
+      them('Email', 'Email không được để trống');
+    } 
     else if (!EMAIL_RE.test(email)) them('Email', 'Email không đúng định dạng');
+    else if (!getAllowedDomains().includes(domain!)){
+      them('Email', `Bắt buộc dùng email ${getAllowedDomains()}`);
+    }
 
     if (boPhan && !vaiTro) them('Vai trò', 'Thiếu vai trò (bắt buộc khi có bộ phận)');
     if (vaiTro && !boPhan) them('Bộ phận', 'Thiếu bộ phận (có vai trò thì phải có bộ phận)');
@@ -254,8 +282,11 @@ export class NguoiDungImporter implements ImporterExcel, OnModuleInit {
     const dsBoPhan = await tx.boPhan.findMany({
       select: { id: true, ma: true, ten: true, loai: true, ngungHoatDong: true },
     });
+
     const dsVaiTro = await tx.vaiTro.findMany({
-      where: { phamVi: PhamViVaiTro.BO_PHAN },
+      where: { 
+        phamVi: PhamViVaiTro.BO_PHAN 
+      },
       select: { id: true, ma: true, ten: true, loaiBoPhan: true, capBac: true, soLuongToiDa: true },
     });
 

@@ -18,4 +18,5 @@ export interface ImporterExcel{
     // nhận danh sách khóa trong file, trả về những khóa có trong DB
     timKhoaDaCo?: (cacKhoa: string[]) => Promise<Set<string>> 
     kiemTraCaFile?: (cacDong: DongExcel[]) => Promise<LoiExcel[]>;
+    suyRa?: (cacDong: DongExcel[]) => Promise<Map<number, Record<string, unknown>>>; //So dong lien ket va cac cot duoc suy ra
 }
