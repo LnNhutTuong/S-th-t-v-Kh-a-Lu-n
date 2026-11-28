@@ -225,7 +225,7 @@ export default function DialogNhapExcel({ loai, open, onOpenChange }: Props) {
                             {duyet.isPending ? "Đang duyệt..." : "Duyệt nhập"}
                         </Button>
                     </div>
-                </div>
+                    </div>
             </DialogContent>
         </Dialog>
     );
