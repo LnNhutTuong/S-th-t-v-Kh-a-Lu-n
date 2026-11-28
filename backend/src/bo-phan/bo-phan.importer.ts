@@ -99,7 +99,10 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
   }
 
   async timKhoaDaCo(cacKhoa: string[]): Promise<Set<string>> {
-    const ds = await this.prisma.boPhan.findMany({ select: { ma: true, ten: true, loai: true } });
+    const ds = await this.prisma.boPhan.findMany({
+      where: { ngungHoatDong: false },
+      select: { ma: true, ten: true, loai: true },
+    });
     const daCo = new Set<string>();
     for (const b of ds) {
       daCo.add(`ma:${b.ma.toLowerCase()}`);
@@ -136,7 +139,7 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
       const tenKey = boDau(ten);
 
       let nut = cacNut.find(
-        (n) => !n.laFile && (ma ? n.ma?.toUpperCase() === ma : n.loai === loai && n.tenKey === tenKey),
+        (n) => !n.laFile && !n.ngung && (ma ? n.ma?.toUpperCase() === ma : n.loai === loai && n.tenKey === tenKey),
       );
       if (nut) {
         nut.tenKey = tenKey;
@@ -152,9 +155,10 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
 
     // 3. tìm cha theo Mã trước, không có thì theo Tên (phải duy nhất)
     const timCha = (chu: string): KetQuaTimCha => {
-      const theoMa = cacNut.filter((n) => n.ma && n.ma.toUpperCase() === chu.toUpperCase());
+      const nutCoTheLamCha = cacNut.filter((n) => !n.ngung || n.laFile);
+      const theoMa = nutCoTheLamCha.filter((n) => n.ma && n.ma.toUpperCase() === chu.toUpperCase());
       if (theoMa.length === 1) return theoMa[0];
-      const theoTen = cacNut.filter((n) => n.tenKey === boDau(chu));
+      const theoTen = nutCoTheLamCha.filter((n) => n.tenKey === boDau(chu));
       if (theoTen.length === 1) return theoTen[0];
       return theoTen.length === 0 ? 'KHONG' : 'NHIEU';
     };
@@ -167,7 +171,7 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
     };
 
     // 4. kiểm tra từng dòng
-    const soBgh = cacNut.filter((n) => n.loai === 'BAN_GIAM_HIEU').length;
+    const soBgh = cacNut.filter((n) => (!n.ngung || n.laFile) && n.loai === 'BAN_GIAM_HIEU').length;
 
     for (const d of cacDong) {
       const nut = nutCuaDong.get(d.dong);
@@ -214,14 +218,14 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
     return loi;
   }
 
-  private timBoPhanCu<T extends { ma: string; ten: string; loai: string }>(ds: T[], maFile: string, loai: string, ten: string): T | undefined{
+  private timBoPhanCu<T extends { ma: string; ten: string; loai: string; ngungHoatDong?: boolean }>(ds: T[], maFile: string, loai: string, ten: string): T | undefined{
     return maFile
-        ? ds.find((b) => b.ma.toUpperCase() === maFile)
-        : ds.find((b) => b.loai === loai && boDau(b.ten) === boDau(ten));
+        ? ds.find((b) => !b.ngungHoatDong && b.ma.toUpperCase() === maFile)
+        : ds.find((b) => !b.ngungHoatDong && b.loai === loai && boDau(b.ten) === boDau(ten));
   }
 
   async ghi(cacDong: DongExcel[], tx: Prisma.TransactionClient): Promise<void> {
-    const dsDb = await tx.boPhan.findMany({ select: { id: true, ma: true, ten: true, loai: true } });
+    const dsDb = await tx.boPhan.findMany({ select: { id: true, ma: true, ten: true, loai: true, ngungHoatDong: true } });
     const maDaDung = new Set(dsDb.map((b) => b.ma));
     const idCuaDong = new Map<number, string>();
 
@@ -241,17 +245,21 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
         continue;
       }
 
-      const ma = maFile || sinhMaBoPhan(ten, loai, maDaDung);
+      const maSuyRa = this.chuoi(d.suyRa?.['Mã']);
+      const ma = maFile || maSuyRa || sinhMaBoPhan(ten, loai, maDaDung);
       if (!ma) throw new BadRequestException(`Dòng ${d.dong}: không sinh được mã`);
 
       const moi = await tx.boPhan.create({ data: { ma, ...du } });
       maDaDung.add(ma);
-      dsDb.push({ id: moi.id, ma, ten, loai });
+      dsDb.push({ id: moi.id, ma, ten, loai, ngungHoatDong: false });
       idCuaDong.set(d.dong, moi.id);
     }
 
     // Lượt 2: gán cha (cha nằm trong file hoặc đã có trong DB, giờ đều đã có trong DB)
-    const dsSau = await tx.boPhan.findMany({ select: { id: true, ma: true, ten: true, nhom: true } });
+    const dsSau = await tx.boPhan.findMany({
+      where: { ngungHoatDong: false },
+      select: { id: true, ma: true, ten: true, nhom: true },
+    });
 
     for (const d of cacDong) {
       const g = d.giaTri;
@@ -263,9 +271,28 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
 
       let cha: (typeof dsSau)[number] | null = null;
       if (chaChu) {
-        const theoMa = dsSau.filter((b) => b.ma.toUpperCase() === chaChu.toUpperCase());
-        const theoTen = dsSau.filter((b) => boDau(b.ten) === boDau(chaChu));
-        cha = theoMa.length === 1 ? theoMa[0] : theoTen.length === 1 ? theoTen[0] : null;
+        const chaTrongFile = cacDong.filter((dongFile) => {
+          const giaTriCha = dongFile.giaTri;
+          const tenCha = this.chuoi(giaTriCha['Tên']);
+          const loaiCha = this.chuoi(giaTriCha['Loại']) as LoaiBoPhan;
+          const cacMa = [giaTriCha['Mã'], dongFile.suyRa?.['Mã']]
+            .map((ma) => this.chuoi(ma).toUpperCase())
+            .filter(Boolean);
+
+          return cacMa.includes(chaChu.toUpperCase())
+            || boDau(tenCha) === boDau(chaChu)
+            || boDau(chuanHoaTenBp(tenCha, loaiCha)) === boDau(chaChu);
+        });
+
+        if (chaTrongFile.length === 1) {
+          const idCha = idCuaDong.get(chaTrongFile[0].dong);
+          cha = dsSau.find((b) => b.id === idCha) ?? null;
+        } else if (chaTrongFile.length === 0) {
+          const theoMa = dsSau.filter((b) => b.ma.toUpperCase() === chaChu.toUpperCase());
+          const theoTen = dsSau.filter((b) => boDau(b.ten) === boDau(chaChu));
+          cha = theoMa.length === 1 ? theoMa[0] : theoTen.length === 1 ? theoTen[0] : null;
+        }
+
         if (!cha) throw new BadRequestException(`Dòng ${d.dong}: không xác định được bộ phận cha "${chaChu}"`);
       }
 
@@ -280,7 +307,9 @@ export class BoPhanImporter implements ImporterExcel, OnModuleInit {
   }
 
   async suyRa(cacDong: DongExcel[]): Promise<Map<number, Record<string, unknown>>>{
-    const ds = await this.prisma.boPhan.findMany({ select: { ma: true, ten: true, loai: true } });
+    const ds = await this.prisma.boPhan.findMany({
+      select: { ma: true, ten: true, loai: true, ngungHoatDong: true },
+    });
     const maDaDung = new Set(ds.map((b) => b.ma));
     const ketQua = new Map<number, Record<string, unknown>>();
 
