@@ -47,6 +47,12 @@ jobs:
       ADMIN_EMAIL: admin.ci@test.local
       ADMIN_TEN: FakeAdmin
       INTERNAL_API_KEY: ci-only-internal-key
+      STORAGE_BUCKET: ci-bucket
+      STORAGE_ENDPOINT: https://ci-bucket.ci-cdn.com
+      STORAGE_REGION: ci-region
+      STORAGE_KEY_ID: ci-key-id
+      STORAGE_APP_KEY: ci-app-key
+      STORAGE_MAX_BYTES: 1048576
 
     defaults:
       run:

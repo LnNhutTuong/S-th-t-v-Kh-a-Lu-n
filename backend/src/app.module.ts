@@ -15,20 +15,24 @@ import { VaiTroModule } from './vai-tro/vai-tro.module.js';
 import { NguoiDungModule } from './nguoi-dung/nguoi-dung.module.js';
 import { ExcelModule } from './excel/excel.module.js';
 import { NhapExcelModule } from './nhap-excel/nhap-excel.module.js';
+import { StorageModule } from './storage/storage.module.js';
 
 @Module({
   imports: [
-    PrismaModule,
-    // TaskModule,
-    // ScheduleModule.forRoot(),
-    // CleanupModule,
+    PrismaModule,    
     ConfigModule.forRoot({
       isGlobal: true,
     }),
     AuthModule,
     BoPhanModule,
     ThanhVienBoPhanModule,    
-    PermissionModule, QuyenHanModule, VaiTroModule, NguoiDungModule, ExcelModule, NhapExcelModule,
+    PermissionModule, 
+    QuyenHanModule, 
+    VaiTroModule, 
+    NguoiDungModule, 
+    ExcelModule, 
+    NhapExcelModule, 
+    StorageModule,
   ],
 
   controllers: [AppController],
